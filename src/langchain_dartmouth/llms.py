@@ -11,6 +11,7 @@ from langchain_core.outputs import GenerationChunk
 from langchain_dartmouth.definitions import LLM_BASE_URL
 from langchain_dartmouth.base import AuthenticatedMixin
 
+import json
 from typing import (
     Any,
     AsyncIterator,
@@ -444,3 +445,22 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
             self.authenticate(jwt_url=self.jwt_url)
             response = await super().agenerate(*args, **kwargs)
             return response
+
+    def _create_chat_result(self, response, generation_info=None):
+        for choice in response.choices:
+            for tool_call in choice.message.tool_calls:
+                # For compatibility with LangChain's OpenAI tooling,
+                # arguments must be JSON strings
+                tool_call.function.arguments = json.dumps(tool_call.function.arguments)
+        return super()._create_chat_result(response, generation_info)
+
+    def _get_request_payload(self, input_, *, stop=None, **kwargs):
+        payload = super()._get_request_payload(input_, stop=stop, **kwargs)
+
+        for message in payload["messages"]:
+            if message["role"] == "tool":
+                message["role"] = "ipython"
+            if message["content"] is None:
+                message["content"] = ""
+
+        return payload

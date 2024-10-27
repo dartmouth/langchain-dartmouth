@@ -1,12 +1,12 @@
 [project]
 name = "langchain_dartmouth"
-version = "0.2.11"
+version = "0.2.12"
 authors = [
   { name="Simon Stone", email="simon.stone@dartmouth.edu" },
 ]
 description = "LangChain components for Dartmouth-hosted models."
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
