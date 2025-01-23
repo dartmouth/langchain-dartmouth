@@ -528,7 +528,7 @@ class ChatDartmouthCloud(ChatOpenAI):
     :type top_p: float, optional
     :param model_kwargs: Holds any model parameters valid for ``create`` call not explicitly specified.
     :type model_kwargs: dict, optional
-    :param dartmouth_chat_api_key: A Dartmouth Chat API key (see `here <https://rcweb.dartmouth.edu/~d20964h/2024-12-11-dartmouth-chat-api/api_key/>`_ for how to obtain one). If not specified, it is attempted to be inferred from an environment variable DARTMOUTH_CHAT_API_KEY.
+    :param dartmouth_chat_api_key: A Dartmouth Chat API key (see `here <https://rcweb.dartmouth.edu/~d20964h/2024-12-11-dartmouth-chat-api/api_key/>`_ for how to obtain one). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
     :type dartmouth_chat_api_key: str, optional
     :param \**_: Additional keyword arguments are silently discarded. This is to ensure interface compatibility with other langchain components.
 
@@ -550,7 +550,7 @@ class ChatDartmouthCloud(ChatOpenAI):
 
     .. note::
 
-        The models available through ``ChatDartmouthCloud`` are pay-as-you-go third-party models. Daily token limits apply.
+        The models available through ``ChatDartmouthCloud`` are pay-as-you-go third-party models. Dartmouth pays for the use, but a daily token limit per user applies.
     """
 
     dartmouth_chat_api_key: Optional[str] = None
