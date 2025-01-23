@@ -24,7 +24,9 @@ load_dotenv(find_dotenv())
 def test_dartmouth_llm():
     llm = DartmouthLLM()
     response = llm.invoke("Write a Python script to swap the values of two variables")
-    print(response)
+    assert response
+
+    assert len(DartmouthLLM.list()) > 0
 
 
 def test_chat_dartmouth():
@@ -40,6 +42,8 @@ def test_chat_dartmouth():
         ]
     )
     assert response.content
+
+    assert len(ChatDartmouth.list()) > 0
 
 
 def test_chat_dartmouth_cloud():
@@ -58,6 +62,8 @@ def test_chat_dartmouth_cloud():
     )
     response = llm.invoke("Who are you?")
     assert "Google" in response.content
+
+    assert len(ChatDartmouthCloud.list()) > 0
 
 
 def test_dartmouth_chat():
@@ -89,6 +95,8 @@ def test_dartmouth_embeddings():
     result = embeddings.embed_query("Is there anybody out there?")
     assert result
 
+    assert len(DartmouthEmbeddings.list()) > 0
+
 
 def test_dartmouth_reranker():
     docs = [
@@ -111,6 +119,8 @@ def test_dartmouth_reranker():
     )
     ranked_docs = reranker.compress_documents(query=query, documents=docs)
     assert len(ranked_docs) == 1
+
+    assert len(DartmouthReranker.list()) > 0
 
 
 @pytest.mark.skip(reason="Needs a locally running instance of TEI")
