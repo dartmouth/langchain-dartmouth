@@ -176,9 +176,9 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
 
     @staticmethod
     def list(dartmouth_api_key: str = None) -> list[dict]:
-        """List the models available through `DartmouthLLM`.
+        """List the models available through ``DartmouthLLM``.
 
-        :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable DARTMOUTH_API_KEY.
+        :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
         :type dartmouth_api_key: str, optional
         :return: A list of descriptions of the available models
         :rtype: list[dict]
@@ -410,9 +410,9 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
 
     @staticmethod
     def list(dartmouth_api_key: str = None) -> list[dict]:
-        """List the models available through `ChatDartmouth`.
+        """List the models available through ``ChatDartmouth``.
 
-        :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable DARTMOUTH_API_KEY.
+        :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
         :type dartmouth_api_key: str, optional
         :return: A list of descriptions of the available models
         :rtype: list[dict]
