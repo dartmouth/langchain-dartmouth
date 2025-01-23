@@ -3,11 +3,14 @@ from langchain_core.documents import Document, BaseDocumentCompressor
 from pydantic import Field
 
 import operator
+import os
+
 from typing import Callable, List, Optional, Sequence
 
 from langchain_dartmouth.base import AuthenticatedMixin
 from langchain_dartmouth.cross_encoders import TextEmbeddingInferenceClient
 from langchain_dartmouth.definitions import RERANK_BASE_URL
+from langchain_dartmouth.model_listing import DartmouthModelListing
 
 
 class TeiCrossEncoderReranker(BaseDocumentCompressor):
@@ -114,6 +117,26 @@ class DartmouthReranker(TeiCrossEncoderReranker, AuthenticatedMixin):
         self.dartmouth_api_key = dartmouth_api_key
         self.authenticate(jwt_url=jwt_url)
 
+    @staticmethod
+    def list(dartmouth_api_key: str = None) -> list[dict]:
+        """List the models available through ``DartmouthReranker``.
+
+        :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
+        :type dartmouth_api_key: str, optional
+        :return: A list of descriptions of the available models
+        :rtype: list[dict]
+        """
+        try:
+            if dartmouth_api_key is None:
+                dartmouth_api_key = os.environ["DARTMOUTH_API_KEY"]
+        except KeyError as e:
+            raise KeyError(
+                "Dartmouth API key not provided as argument or defined as environment variable 'DARTMOUTH_API_KEY'."
+            ) from e
+        listing = DartmouthModelListing(api_key=dartmouth_api_key)
+        models = listing.list(server="text-embeddings-inference", type="reranking")
+        return models
+
     def compress_documents(
         self,
         documents: List[Document],
@@ -139,13 +162,4 @@ class DartmouthReranker(TeiCrossEncoderReranker, AuthenticatedMixin):
 
 
 if __name__ == "__main__":
-    from langchain.docstore.document import Document
-
-    docs = [
-        Document(page_content="Deep Learning is not..."),
-        Document(page_content="Deep learning is..."),
-    ]
-    query = "What is Deep Learning?"
-    reranker = DartmouthReranker()
-    ranked_docs = reranker.compress_documents(query=query, documents=docs)
-    print(ranked_docs)
+    print(DartmouthReranker.list())
