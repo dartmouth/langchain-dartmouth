@@ -17,10 +17,19 @@ pip install langchain_dartmouth
 ```
 export DARTMOUTH_API_KEY=<your_key_here>
 ```
+4. Obtain a [Dartmouth Chat API key ](https://rcweb.dartmouth.edu/~d20964h/2024-12-11-dartmouth-chat-api/api_key/)
+5. Store the API key as an environment variable called `DARTMOUTH_CHAT_API_KEY`
+```
+export DARTMOUTH_CHAT_API_KEY=<your_key_here>
+```
+
+> [!NOTE]
+> You may want to[ make the environment variables permanent](https://www3.ntu.edu.sg/home/ehchua/programming/howto/Environment_Variables.html) or use a [`.env` file](https://saurabh-kumar.com/python-dotenv/)
+
 
 ## What is this?
 
-This library provides an integration of Darmouth-hosted generative AI resources with [the LangChain framework](https://python.langchain.com/v0.1/docs/get_started/introduction).
+This library provides an integration of Darmouth-provided generative AI resources with [the LangChain framework](https://python.langchain.com/v0.1/docs/get_started/introduction).
 
 There are three main components currently implemented:
 
@@ -34,10 +43,13 @@ All of these components are based on corresponding LangChain base classes and ca
 
 ### Large Language Models
 
-There are two kinds of Large Language Models (LLMs) hosted by Dartmouth:
+There are three kinds of Large Language Models (LLMs) provided by Dartmouth:
 
-- Base models without instruction tuning (require no special prompt format)
-- Instruction-tuned models (also known as Chat models) requiring [specific prompt formats](https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-3/)
+- On-premise:
+  - Base models without instruction tuning (require no special prompt format)
+  - Instruction-tuned models (also known as Chat models) requiring [specific prompt formats](https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-3/)
+- Cloud:
+  - Third-party, pay-as-you-go chat models (e.g., OpenAI's GPT 4o, Google Gemini)
 
 Using a Dartmouth-hosted base language model:
 
@@ -62,7 +74,19 @@ response = llm.invoke("Hi there!")
 
 print(response.content)
 ```
-> **Note**: The required prompt format is enforced automatically when you are using `ChatDartmouth`.
+> [!NOTE]
+> The required prompt format is enforced automatically when you are using `ChatDartmouth`.
+
+Using a Dartmouth-provided third-party chat model:
+
+```{python}
+from langchain_dartmouth.llms import ChatDartmouthCloud
+
+
+llm = ChatDartmouthCloud(model_name="openai.gpt-4o-mini-2024-07-18")
+
+response = llm.invoke("Hi there!")
+
 
 ### Embeddings model
 
@@ -103,7 +127,7 @@ print(ranked_docs)
 
 ## Available models
 
-For a list of available models, check the documentation of the RESTful [Dartmouth AI API](https://ai.dartmouth.edu/openapi/index.html).
+For a list of available models, check the respective `list()` method of each class.
 
 
 ## License
@@ -111,7 +135,7 @@ For a list of available models, check the documentation of the RESTful [Dartmout
 <tbody>
   <tr>
     <td style="padding:0px;border-width:0px;vertical-align:center">
-    Created by Simon Stone for Dartmouth College under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons CC BY-NC 4.0 License</a>.<br>For questions, comments, or improvements, email <a href="mailto:researchdatahelp@groups.dartmouth.edu">Research Data Services</a>.
+    Created by Simon Stone for Dartmouth College under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons CC BY-NC 4.0 License</a>.<br>For questions, comments, or improvements, email <a href="mailto:researchcomputing@dartmouth.edu">Research Computing</a>.
     </td>
     <td style="padding:0 0 0 1em;border-width:0px;vertical-align:center"><img alt="Creative Commons License" src="https://i.creativecommons.org/l/by/4.0/88x31.png"/></td>
   </tr>
