@@ -12,8 +12,18 @@ There are three main components currently implemented:
    - Used to rerank retrieved documents based on their relevance to a query.
 
 .. note::
-   These components provide access to the models deployed in Dartmouth's compute infrastructure using a RESTful API. To see which models are available, check the documentation of the `Dartmouth AI API <https://ai.dartmouth.edu/openapi/index.html>`_ under ``Text Generation Inference`` and ``Text Embeddings Inference``. A method to list the available models from within this library is currently in development.
+   These components provide access to the models deployed in Dartmouth's compute infrastructure using a RESTful API, and to third-party models made accessible by Dartmouth. To see which models are available, check the respective ``list()`` method of each class.
 
+
+Installation
+==================
+You can install the latest release of the library from PyPI using pip:
+
+.. code-block::
+
+   pip install langchain_dartmouth
+
+Alternatively, you can clone the `library repository <https://github.com/dartmouth/langchain-dartmouth>`_ from GitHub.
 
 Getting Started
 ==================
@@ -29,6 +39,11 @@ Even though you can pass your key to each component using the ``dartmouth_api_ke
    api
    :maxdepth: 2
    :caption: API Reference
+
+User Guide
+======================
+While this documentation contains the technical API reference, you can find a collection of tutorials (or recipes) on how to use the components in this library in the `LangChain Dartmouth Cookbook <https://dartmouth-libraries.github.io/langchain-dartmouth-cookbook/>`_.
+
 
 Feedback and Comments
 ======================

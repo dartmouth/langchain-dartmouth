@@ -1,9 +1,11 @@
 from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 
+import os
 from typing import Callable, List, Optional
 
 from langchain_dartmouth.base import AuthenticatedMixin
 from langchain_dartmouth.definitions import EMBEDDINGS_BASE_URL
+from langchain_dartmouth.model_listing import DartmouthModelListing
 
 
 class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
@@ -62,6 +64,26 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
         self.authenticator = authenticator
         self.dartmouth_api_key = dartmouth_api_key
         self.authenticate(jwt_url=jwt_url)
+
+    @staticmethod
+    def list(dartmouth_api_key: str = None) -> list[dict]:
+        """List the models available through ``DartmouthEmbeddings``.
+
+        :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
+        :type dartmouth_api_key: str, optional
+        :return: A list of descriptions of the available models
+        :rtype: list[dict]
+        """
+        try:
+            if dartmouth_api_key is None:
+                dartmouth_api_key = os.environ["DARTMOUTH_API_KEY"]
+        except KeyError as e:
+            raise KeyError(
+                "Dartmouth API key not provided as argument or defined as environment variable 'DARTMOUTH_API_KEY'."
+            ) from e
+        listing = DartmouthModelListing(api_key=dartmouth_api_key)
+        models = listing.list(server="text-embeddings-inference", type="embedding")
+        return models
 
     def embed_query(self, text: str) -> List[float]:
         """Call out to the embedding endpoint to retrieve the embedding of the query text.
@@ -122,3 +144,6 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
             self.authenticate(jwt_url=self.jwt_url)
             response = await super().aembed_documents(texts)
             return response
+
+if __name__ == "__main__":
+    print(DartmouthEmbeddings.list())
