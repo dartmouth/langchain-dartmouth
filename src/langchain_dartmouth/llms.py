@@ -169,6 +169,23 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
         self.jwt_url = jwt_url
         self.authenticate(jwt_url=self.jwt_url)
 
+    @staticmethod
+    def list(dartmouth_api_key: str = None) -> list[dict]:
+        """List the models available through `DartmouthLLM`.
+
+        :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable DARTMOUTH_API_KEY.
+        :type dartmouth_api_key: str, optional
+        :return: A list of descriptions of the available models
+        :rtype: list[dict]
+        """
+        try:
+            if dartmouth_api_key is None:
+                dartmouth_api_key = os.environ["DARTMOUTH_API_KEY"]
+        except KeyError as e:
+            raise KeyError(
+                "Dartmouth Chat API key not provided as argument or defined as environment variable 'DARTMOUTH_CHAT_API_KEY'."
+            ) from e
+
     def invoke(self, *args, **kwargs) -> str:
         """Transforms a single input into an output.
 
