@@ -620,9 +620,9 @@ class ChatDartmouthCloud(ChatOpenAI):
 
     @staticmethod
     def list(dartmouth_chat_api_key: str = None) -> list[dict]:
-        """List the models available through `ChatDartmouthCloud`.
+        """List the models available through ``ChatDartmouthCloud``.
 
-        :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable `DARTMOUTH_CHAT_API_KEY`.
+        :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
         :type dartmouth_chat_api_key: str, optional
         :return: A list of descriptions of the available models
         :rtype: list[dict]
