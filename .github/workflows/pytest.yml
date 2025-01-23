@@ -39,3 +39,4 @@ jobs:
         pytest
       env:
         DARTMOUTH_API_KEY: ${{ secrets.DARTMOUTH_API_KEY }}
+        DARTMOUTH_CHAT_API_KEY: ${{ secrets.DARTMOUTH_CHAT_API_KEY }}

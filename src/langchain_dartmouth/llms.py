@@ -8,8 +8,10 @@ from pydantic import Field
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_core.messages import BaseMessage, BaseMessageChunk
 from langchain_core.outputs import GenerationChunk
-from langchain_dartmouth.definitions import LLM_BASE_URL
+from langchain_dartmouth.definitions import LLM_BASE_URL, CLOUD_BASE_URL
 from langchain_dartmouth.base import AuthenticatedMixin
+
+import os
 
 from typing import (
     Any,
@@ -444,3 +446,163 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
             self.authenticate(jwt_url=self.jwt_url)
             response = await super().agenerate(*args, **kwargs)
             return response
+
+
+class ChatDartmouthCloud(ChatOpenAI):
+    r"""Cloud chat models made available by Dartmouth.
+
+    Use this class if you want to use a model by a third-party provider, e.g., Anthropic or OpenAI, made accessible by Dartmouth.
+
+    :param model_name: Name of the model to use, defaults to ``"openai.gpt-4o-mini-2024-07-18"``.
+    :type model_name: str
+    :param streaming: Whether to stream the results or not, defaults to ``False``.
+    :type streaming: bool
+    :param temperature: Temperature to use for sampling (higher temperature means more varied outputs), defaults to ``0.7``.
+    :type temperature: float
+    :param max_tokens: Maximum number of tokens to generate, defaults to 512
+    :type max_tokens: int
+    :param logprobs: Whether to return logprobs
+    :type logprobs: bool, optional
+    :param stream_usage: Whether to include usage metadata in streaming output. If ``True``, additional message chunks will be generated during the stream including usage metadata, defaults to ``False``.
+    :type stream_usage: bool
+    :param presence_penalty: Penalizes repeated tokens.
+    :type presence_penalty: float, optional
+    :param frequency_penalty: Penalizes repeated tokens according to frequency.
+    :type frequency_penalty: float, optional
+    :param seed: Seed for generation
+    :type seed: int, optional
+    :param top_logprobs: Number of most likely tokens to return at each token position, each with an associated log probability. ``logprobs`` must be set to true if this parameter is used.
+    :type top_logprobs: int, optional
+    :param logit_bias: Modify the likelihood of specified tokens appearing in the completion.
+    :type logit_bias: dict, optional
+    :param n: Number of chat completions to generate for each prompt, defaults to ``1``
+    :type n: int
+    :param top_p: Total probability mass of tokens to consider at each step.
+    :type top_p: float, optional
+    :param model_kwargs: Holds any model parameters valid for ``create`` call not explicitly specified.
+    :type model_kwargs: dict, optional
+    :param dartmouth_chat_api_key: A Dartmouth Chat API key (see `here <https://rcweb.dartmouth.edu/~d20964h/2024-12-11-dartmouth-chat-api/api_key/>`_ for how to obtain one). If not specified, it is attempted to be inferred from an environment variable DARTMOUTH_CHAT_API_KEY.
+    :type dartmouth_chat_api_key: str, optional
+    :param \**_: Additional keyword arguments are silently discarded. This is to ensure interface compatibility with other langchain components.
+
+
+    Example
+    ----------
+
+    With an environment variable named ``DARTMOUTH_CHAT_API_KEY`` pointing to your key obtained from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_, using a third-party LLM provided by Dartmouth only takes a few lines of code:
+
+    .. code-block:: python
+
+        from langchain_dartmouth.llms import ChatDartmouthCloud
+
+        llm = ChatDartmouthCloud(model_name="openai.gpt-4o-mini-2024-07-18")
+
+        response = llm.invoke("Hi there!")
+
+        print(response.content)
+
+    .. note::
+
+        The models available through ``ChatDartmouthCloud`` are pay-as-you-go third-party models. Daily token limits apply.
+    """
+
+    dartmouth_chat_api_key: Optional[str] = None
+    temperature: float = 0.7
+    max_tokens: int = 512
+    stream_usage: bool = False
+    presence_penalty: Optional[float] = None
+    frequency_penalty: Optional[float] = None
+    seed: Optional[int] = None
+    logprobs: Optional[bool] = None
+    top_logprobs: Optional[int] = None
+    logit_bias: Optional[Dict[int, int]] = None
+    streaming: bool = False
+    n: int = 1
+    top_p: Optional[float] = None
+    model_kwargs: Optional[dict] = None
+    model_name: str = Field(default="openai.gpt-4o-mini-2024-07-18")
+
+    def __init__(
+        self,
+        model_name: str = "openai.gpt-4o-mini-2024-07-18",
+        streaming: bool = False,
+        temperature: float = 0.7,
+        max_tokens: int = 512,
+        logprobs: Optional[bool] = None,
+        stream_usage: bool = False,
+        presence_penalty: Optional[float] = None,
+        frequency_penalty: Optional[float] = None,
+        seed: Optional[int] = None,
+        top_logprobs: Optional[int] = None,
+        logit_bias: Optional[Dict[int, int]] = None,
+        n: int = 1,
+        top_p: Optional[float] = None,
+        model_kwargs: Optional[dict] = None,
+        dartmouth_chat_api_key: Optional[str] = None,
+        **_,
+    ):
+        # Explicitly pass kwargs to control which ones show up in the documentation
+        kwargs = {
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+            "stream_usage": stream_usage,
+            "presence_penalty": presence_penalty,
+            "frequency_penalty": frequency_penalty,
+            "seed": seed,
+            "logprobs": logprobs,
+            "top_logprobs": top_logprobs,
+            "logit_bias": logit_bias,
+            "streaming": streaming,
+            "n": n,
+            "top_p": top_p,
+            "model_kwargs": model_kwargs if model_kwargs is not None else {},
+        }
+        kwargs["model_name"] = model_name
+        kwargs["openai_api_base"] = f"{CLOUD_BASE_URL}"
+        if dartmouth_chat_api_key is None:
+            try:
+                dartmouth_chat_api_key = os.environ["DARTMOUTH_CHAT_API_KEY"]
+            except KeyError as e:
+                raise KeyError(
+                    "Dartmouth Chat API key not provided as argument or defined as environment variable 'DARTMOUTH_CHAT_API_KEY'."
+                ) from e
+
+        kwargs["openai_api_key"] = dartmouth_chat_api_key
+        super().__init__(**kwargs)
+        self.dartmouth_chat_api_key = dartmouth_chat_api_key
+
+    def invoke(self, *args, **kwargs) -> BaseMessage:
+        """Invokes the model to get a response to a query.
+
+        See `LangChain's API documentation <https://python.langchain.com/v0.1/docs/expression_language/interface/>`_ for details on how to use this method.
+
+        :return: The LLM's response to the prompt.
+        :rtype: BaseMessage
+        """
+        return super().invoke(*args, **kwargs)
+
+    async def ainvoke(self, *args, **kwargs) -> BaseMessage:
+        """Asynchronously invokes the model to get a response to a query.
+
+        See `LangChain's API documentation <https://python.langchain.com/v0.1/docs/expression_language/interface/>`_ for details on how to use this method.
+
+        :return: The LLM's response to the prompt.
+        :rtype: BaseMessage
+        """
+        response = await super().ainvoke(*args, **kwargs)
+        return response
+
+    def stream(self, *args, **kwargs) -> Iterator[BaseMessageChunk]:
+        for chunk in super().stream(*args, **kwargs):
+            yield chunk
+
+    async def astream(self, *args, **kwargs) -> AsyncIterator[BaseMessageChunk]:
+        async for chunk in super().astream(*args, **kwargs):
+            yield chunk
+
+    def generate(self, *args, **kwargs) -> LLMResult:
+        return super().generate(*args, **kwargs)
+
+    async def agenerate(self, *args, **kwargs) -> LLMResult:
+        response = await super().agenerate(*args, **kwargs)
+        return response

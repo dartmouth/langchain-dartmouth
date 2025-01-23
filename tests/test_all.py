@@ -1,6 +1,11 @@
 import pytest
 
-from langchain_dartmouth.llms import DartmouthLLM, ChatDartmouth, DartmouthChatModel
+from langchain_dartmouth.llms import (
+    DartmouthLLM,
+    ChatDartmouth,
+    DartmouthChatModel,
+    ChatDartmouthCloud,
+)
 from langchain_dartmouth.embeddings import DartmouthEmbeddings
 from langchain_dartmouth.cross_encoders import TextEmbeddingInferenceClient
 from langchain_dartmouth.retrievers.document_compressors import (
@@ -35,6 +40,24 @@ def test_chat_dartmouth():
         ]
     )
     assert response.content
+
+
+def test_chat_dartmouth_cloud():
+    llm = ChatDartmouthCloud(temperature=0.0, seed=42)
+    response = llm.invoke("Who are you?")
+    assert "OpenAI" in response.content
+
+    llm = ChatDartmouthCloud(
+        model_name="mistral.mistral-small-2409", temperature=0.0, seed=42
+    )
+    response = llm.invoke("Who are you?")
+    assert "Mistral" in response.content
+
+    llm = ChatDartmouthCloud(
+        model_name="google_genai.gemini-1.5-pro-002", temperature=0.0, seed=42
+    )
+    response = llm.invoke("Who are you?")
+    assert "Google" in response.content
 
 
 def test_dartmouth_chat():
@@ -117,10 +140,11 @@ def test_tei_client():
 
 
 if __name__ == "__main__":
-    test_dartmouth_llm()
-    test_chat_dartmouth()
-    test_dartmouth_chat()
-    test_dartmouth_embeddings()
-    test_dartmouth_reranker()
+    # test_dartmouth_llm()
+    # test_chat_dartmouth()
+    test_chat_dartmouth_cloud()
+    # test_dartmouth_chat()
+    # test_dartmouth_embeddings()
+    # test_dartmouth_reranker()
     # test_tei_client()   # requires locally running instance of vanilla TEI
     # # test_tei_reranker()  # requires locally running instance of vanilla TEI
