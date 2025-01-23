@@ -1,6 +1,6 @@
 ``langchain_dartmouth`` -- LangChain components for Dartmouth's on-premise models
 =================================================================================
-This package contains components to facilitate the use of models deployed in Dartmouth College's compute infrastructure. The components are fully compatible with `LangChain <https://python.langchain.com/>`_, allowing seamless integration and plug-and-play compatibility with the vast number of components in the ecosystem.
+This package contains components to facilitate the use of models deployed in Dartmouth College's compute infrastructure or third-party models made accessible by Dartmouth. The components are fully compatible with `LangChain <https://python.langchain.com/>`_, allowing seamless integration and plug-and-play compatibility with the vast number of components in the ecosystem.
 
 There are three main components currently implemented:
 
@@ -17,9 +17,10 @@ There are three main components currently implemented:
 
 Getting Started
 ==================
-Using Dartmouth's compute infrastructure requires authentication. The components in this library handle authentication "under-the-hood", but require a valid Dartmouth API key. You can obtain a key from `Dartmouth's Developer Portal <https://developer.dartmouth.edu/keys>`_.
+Using Dartmouth's compute infrastructure or the third-party models paid for by Dartmouth requires authentication. The components in this library handle authentication "under-the-hood", but require valid Dartmouth API keys.
+For the on-premise models, you can obtain a key from `Dartmouth's Developer Portal <https://developer.dartmouth.edu/keys>`_. For the third-party models, you can find instructions on how to obtain a key `here <https://rcweb.dartmouth.edu/~d20964h/2024-12-11-dartmouth-chat-api/api_key/>`_.`
 
-Even though you can pass your key to each component using the ``dartmouth_api_key`` parameter, it is good practice to not include the API key in your code directly. Instead, you should set the environment variable ``DARTMOUTH_API_KEY`` to your key. This will ensure that the key is not exposed in your code.
+Even though you can pass your key to each component using the ``dartmouth_api_key`` or ``dartmouth_chat_api_key`` parameter, it is good practice to not include the API key in your code directly. Instead, you should set the environment variable ``DARTMOUTH_API_KEY`` or ``DARTMOUTH_CHAT_API_KEY`` to your key. This will ensure that the key is not exposed in your code.
 
 .. note::
    We recommend using `python-dotenv <https://saurabh-kumar.com/python-dotenv/>`_ to manage your environment variables with an ``.env`` file.
@@ -31,15 +32,16 @@ Even though you can pass your key to each component using the ``dartmouth_api_ke
 
 Feedback and Comments
 ======================
-For questions, comments, or improvements, email `Research Data Services <mailto:researchdatahelp@groups.dartmouth.edu>`_.
+For questions, comments, or improvements, email `Research Computing <mailto:research.computing@dartmouth.edu>`_.
 
 
 License
 ==================
-Created by Simon Stone for Dartmouth Libraries under `Creative Commons CC BY-NC 4.0 License <https://creativecommons.org/licenses/by/4.0/>`_
+Created by Simon Stone for Dartmouth College under `Creative Commons CC BY-NC 4.0 License <https://creativecommons.org/licenses/by/4.0/>`_
 
-.. image:: _static/img/dartmouth-libraries-logo-light.png
+.. image:: _static/img/dartmouth-wordmark.png
    :scale: 10%
+   :class: margin
 
 .. image:: https://i.creativecommons.org/l/by/4.0/88x31.png
 
