@@ -16,6 +16,8 @@ from langchain_dartmouth.model_listing import (
     reformat_model_spec,
 )
 
+from openai import DefaultHttpxClient, DefaultAsyncHttpxClient
+
 import os
 
 from typing import (
@@ -615,7 +617,12 @@ class ChatDartmouthCloud(ChatOpenAI):
                 ) from e
 
         kwargs["openai_api_key"] = dartmouth_chat_api_key
-        super().__init__(**kwargs)
+        super().__init__(
+            **kwargs,
+            # Turn off following redirects, see issue #8
+            http_async_client=DefaultAsyncHttpxClient(follow_redirects=False),
+            http_client=DefaultHttpxClient(follow_redirects=False),
+        )
         self.dartmouth_chat_api_key = dartmouth_chat_api_key
 
     @staticmethod
