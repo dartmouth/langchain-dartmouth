@@ -19,6 +19,7 @@ dependencies = [
     "langchain",
     "langchain_community",
     "langchain_huggingface",
+    "huggingface-hub==0.26.3",
     "langchain_openai",
     "text_generation",
     "python-dotenv",
