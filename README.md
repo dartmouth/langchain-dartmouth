@@ -93,10 +93,10 @@ response = llm.invoke("Hi there!")
 Using a Dartmouth-hosted embeddings model:
 
 ```{python}
-from langchain_dartmouth.embeddings import DartmouthEmbeddingsModel
+from langchain_dartmouth.embeddings import DartmouthEmbeddings
 
 
-embeddings = DartmouthEmbeddingsModel()
+embeddings = DartmouthEmbeddings()
 
 embeddings.embed_query("Hello? Is there anybody in there?")
 
