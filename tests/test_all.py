@@ -53,8 +53,6 @@ def test_chat_dartmouth():
     )
     assert response.content
 
-    assert len(ChatDartmouth.list()) > 0
-
 
 @pytest.mark.parametrize(
     "model",
@@ -69,13 +67,17 @@ def test_chat_dartmouth_list(model):
 @pytest.mark.parametrize(
     "model_name, expected",
     [
+        ("default", "OpenAI"),
         ("openai.o4-mini-2025-04-16", "OpenAI"),
         ("mistral.mistral-small-2503", "Mistral"),
         ("google_genai.gemini-1.5-pro-002", "Google"),
     ],
 )
 def test_chat_dartmouth_cloud(model_name, expected):
-    llm = ChatDartmouthCloud(model_name=model_name, seed=42)
+    if model_name == "default":
+        llm = ChatDartmouthCloud(seed=42)
+    else:
+        llm = ChatDartmouthCloud(model_name=model_name, seed=42)
     response = llm.invoke("Who are you?")
     assert expected in response.content
 

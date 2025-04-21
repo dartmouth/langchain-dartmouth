@@ -585,7 +585,7 @@ class ChatDartmouthCloud(ChatOpenAI):
 
     def __init__(
         self,
-        model_name: str = "openai.gpt-4o-mini-2024-07-18",
+        model_name: str = "openai.gpt-4.1-mini-2025-04-14",
         streaming: bool = False,
         temperature: float = 0.7,
         max_tokens: int = 512,
