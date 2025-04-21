@@ -3,6 +3,8 @@ import sys
 
 sys.path.insert(0, os.path.abspath("../src/langchain_dartmouth/"))
 
+from langchain_dartmouth import __version__
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -11,7 +13,8 @@ copyright = (
     "by Simon Stone for Dartmouth College under Creative Commons CC BY-NC 4.0 License"
 )
 author = "Simon Stone"
-release = "0.2.12"
+version = __version__
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
