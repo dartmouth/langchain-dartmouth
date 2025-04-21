@@ -1,3 +1,4 @@
+from langchain_dartmouth.definitions import USER_AGENT
 from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 
 import os
@@ -61,6 +62,8 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
         else:
             endpoint = f"{EMBEDDINGS_BASE_URL}{model_name}/"
         super().__init__(model=endpoint, model_kwargs=model_kwargs)
+        self.client.headers.update({"User-Agent": USER_AGENT})
+        self.async_client.headers.update({"User-Agent": USER_AGENT})
         self.authenticator = authenticator
         self.dartmouth_api_key = dartmouth_api_key
         self.authenticate(jwt_url=jwt_url)

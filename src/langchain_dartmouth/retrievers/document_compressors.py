@@ -9,7 +9,7 @@ from typing import Callable, List, Optional, Sequence
 
 from langchain_dartmouth.base import AuthenticatedMixin
 from langchain_dartmouth.cross_encoders import TextEmbeddingInferenceClient
-from langchain_dartmouth.definitions import RERANK_BASE_URL
+from langchain_dartmouth.definitions import RERANK_BASE_URL, USER_AGENT
 from langchain_dartmouth.model_listing import DartmouthModelListing
 
 
@@ -111,7 +111,9 @@ class DartmouthReranker(TeiCrossEncoderReranker, AuthenticatedMixin):
 
         super().__init__(
             top_n=top_n,
-            client=TextEmbeddingInferenceClient(inference_server_url=endpoint),
+            client=TextEmbeddingInferenceClient(
+                inference_server_url=endpoint, headers={"User-Agent": USER_AGENT}
+            ),
         )
         self.authenticator = authenticator
         self.dartmouth_api_key = dartmouth_api_key

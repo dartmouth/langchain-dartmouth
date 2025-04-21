@@ -8,7 +8,7 @@ from pydantic import Field, model_validator
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_core.messages import BaseMessage, BaseMessageChunk
 from langchain_core.outputs import GenerationChunk
-from langchain_dartmouth.definitions import LLM_BASE_URL, CLOUD_BASE_URL
+from langchain_dartmouth.definitions import LLM_BASE_URL, CLOUD_BASE_URL, USER_AGENT
 from langchain_dartmouth.base import AuthenticatedMixin
 from langchain_dartmouth.exceptions import ModelNotFoundError
 from langchain_dartmouth.model_listing import (
@@ -25,7 +25,6 @@ from openai import (
 )
 
 import os
-
 from typing import (
     Any,
     AsyncIterator,
@@ -36,6 +35,7 @@ from typing import (
     Optional,
 )
 import warnings
+
 
 class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
     r"""
@@ -177,6 +177,7 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
             "inference_server_url": inference_server_url,
             "model_kwargs": model_kwargs if model_kwargs is not None else {},
         }
+        kwargs["server_kwargs"]["headers"] = {"User-Agent": USER_AGENT}
         super().__init__(**kwargs)
         self.model_name = model_name
         self.authenticator = authenticator
@@ -440,6 +441,7 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
             kwargs["openai_api_base"] = f"{LLM_BASE_URL}{model_name}/v1/"
         # For compliance, a non-null API key must be set
         kwargs["openai_api_key"] = "unused"
+        kwargs["default_headers"] = {"User-Agent": USER_AGENT}
         super().__init__(**kwargs)
         self.authenticator = authenticator
         self.dartmouth_api_key = dartmouth_api_key
@@ -686,6 +688,7 @@ class ChatDartmouthCloud(ChatOpenAI):
             "top_p": top_p,
             "model_kwargs": model_kwargs if model_kwargs is not None else {},
         }
+        kwargs["default_headers"] = {"User-Agent": USER_AGENT}
         kwargs["model_name"] = model_name
         kwargs["openai_api_base"] = f"{CLOUD_BASE_URL}"
         if dartmouth_chat_api_key is None:

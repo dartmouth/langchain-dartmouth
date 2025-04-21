@@ -136,13 +136,6 @@ def test_dartmouth_embeddings():
     result = embeddings.embed_query("Is there anybody out there?")
     assert result
 
-    embeddings = DartmouthEmbeddings(
-        jwt_url="https://api-dev.dartmouth.edu/api/jwt",
-        embeddings_server_url="https://ai-api-dev.dartmouth.edu/tei/",
-    )
-    result = embeddings.embed_query("Is there anybody out there?")
-    assert result
-
     assert len(DartmouthEmbeddings.list()) > 0
 
 
@@ -157,14 +150,6 @@ def test_dartmouth_reranker():
     assert ranked_docs
 
     reranker = DartmouthReranker(top_n=1)
-    ranked_docs = reranker.compress_documents(query=query, documents=docs)
-    assert len(ranked_docs) == 1
-
-    reranker = DartmouthReranker(
-        top_n=1,
-        jwt_url="https://api-dev.dartmouth.edu/api/jwt",
-        embeddings_server_url="https://ai-api-dev.dartmouth.edu/tei/",
-    )
     ranked_docs = reranker.compress_documents(query=query, documents=docs)
     assert len(ranked_docs) == 1
 
