@@ -29,6 +29,16 @@ def test_dartmouth_llm():
     assert len(DartmouthLLM.list()) > 0
 
 
+@pytest.mark.parametrize(
+    "model",
+    [model["name"] for model in DartmouthLLM.list()],
+)
+def test_dartmouth_llm_list(model):
+    llm = DartmouthLLM(model_name=model, max_new_tokens=16)
+    response = llm.invoke("Hi there")
+    assert len(response) > 0
+
+
 def test_chat_dartmouth():
     llm = ChatDartmouth(model_name="llama-3-8b-instruct")
     response = llm.invoke("Please respond with the single word OK")
@@ -47,6 +57,16 @@ def test_chat_dartmouth():
 
 
 @pytest.mark.parametrize(
+    "model",
+    [model["name"] for model in ChatDartmouth.list()],
+)
+def test_chat_dartmouth_list(model):
+    llm = ChatDartmouth(model_name=model)
+    response = llm.invoke("Are you there? Say yes or no")
+    assert "yes" in response.content.lower(), f"Model {model} did not respond."
+
+
+@pytest.mark.parametrize(
     "model_name, expected",
     [
         ("openai.o4-mini-2025-04-16", "OpenAI"),
@@ -59,7 +79,15 @@ def test_chat_dartmouth_cloud(model_name, expected):
     response = llm.invoke("Who are you?")
     assert expected in response.content
 
-    assert len(ChatDartmouthCloud.list()) > 0
+
+@pytest.mark.parametrize(
+    "model",
+    [model["name"] for model in ChatDartmouthCloud.list()],
+)
+def test_chat_dartmouth_cloud_list(model):
+    llm = ChatDartmouthCloud(model_name=model)
+    response = llm.invoke("Are you there? Say yes or no")
+    assert "yes" in response.content.lower(), f"Model {model} did not respond."
 
 
 def test_dartmouth_chat():
