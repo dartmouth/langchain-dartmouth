@@ -10,13 +10,19 @@ from langchain_core.messages import BaseMessage, BaseMessageChunk
 from langchain_core.outputs import GenerationChunk
 from langchain_dartmouth.definitions import LLM_BASE_URL, CLOUD_BASE_URL
 from langchain_dartmouth.base import AuthenticatedMixin
+from langchain_dartmouth.exceptions import ModelNotFoundError
 from langchain_dartmouth.model_listing import (
     DartmouthModelListing,
     CloudModelListing,
     reformat_model_spec,
 )
 
-from openai import DefaultHttpxClient, DefaultAsyncHttpxClient
+from openai import (
+    DefaultHttpxClient,
+    DefaultAsyncHttpxClient,
+    BadRequestError,
+    NotFoundError,
+)
 
 import os
 
@@ -121,6 +127,7 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
     watermark: bool = False
     server_kwargs: Dict[str, Any] = Field(default_factory=dict)
     model_kwargs: Dict[str, Any] = Field(default_factory=dict)
+    model_name: str = Field(default="codellama-13b-python-hf")
 
     def __init__(
         self,
@@ -171,6 +178,7 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
             "model_kwargs": model_kwargs if model_kwargs is not None else {},
         }
         super().__init__(**kwargs)
+        self.model_name = model_name
         self.authenticator = authenticator
         self.dartmouth_api_key = dartmouth_api_key
         self.jwt_url = jwt_url
@@ -207,8 +215,16 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
         try:
             return super().invoke(*args, **kwargs)
         except KeyError:
-            self.authenticate(jwt_url=self.jwt_url)
-            return super().invoke(*args, **kwargs)
+            # Error might be because of stale JWT
+            try:
+                self.authenticate(jwt_url=self.jwt_url)
+                return super().invoke(*args, **kwargs)
+            except KeyError:
+                # If re-auth did not help, the model name is wrong
+                raise ModelNotFoundError(
+                    f"Model {self.model_name} not found. Please use `DartmouthLLM.list()` "
+                    "to verify the model name."
+                )
 
     async def ainvoke(self, *args, **kwargs) -> str:
         """Asynchronously transforms a single input into an output.
@@ -221,8 +237,16 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
         try:
             return super().ainvoke(*args, **kwargs)
         except KeyError:
-            self.authenticate(jwt_url=self.jwt_url)
-            return super().ainvoke(*args, **kwargs)
+            # Error might be because of stale JWT
+            try:
+                self.authenticate(jwt_url=self.jwt_url)
+                return super().ainvoke(*args, **kwargs)
+            except KeyError:
+                # If re-auth did not help, the model name is wrong
+                raise ModelNotFoundError(
+                    f"Model {self.model_name} not found. Please use `DartmouthLLM.list()` "
+                    "to verify the model name."
+                )
 
     def _stream(
         self,
@@ -237,11 +261,18 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
             ):
                 yield chunk
         except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            for chunk in super()._stream(
-                prompt=prompt, stop=stop, run_manager=run_manager, **kwargs
-            ):
-                yield chunk
+            try:
+                self.authenticate(jwt_url=self.jwt_url)
+                for chunk in super()._stream(
+                    prompt=prompt, stop=stop, run_manager=run_manager, **kwargs
+                ):
+                    yield chunk
+            except KeyError:
+                # If re-auth did not help, the model name is wrong
+                raise ModelNotFoundError(
+                    f"Model {self.model_name} not found. Please use `DartmouthLLM.list()` "
+                    "to verify the model name."
+                )
 
     async def _astream(
         self,
@@ -257,11 +288,18 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
                 yield chunk
 
         except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            async for chunk in super()._astream(
-                prompt=prompt, stop=stop, run_manager=run_manager, **kwargs
-            ):
-                yield chunk
+            try:
+                self.authenticate(jwt_url=self.jwt_url)
+                async for chunk in super()._astream(
+                    prompt=prompt, stop=stop, run_manager=run_manager, **kwargs
+                ):
+                    yield chunk
+            except KeyError:
+                # If re-auth did not help, the model name is wrong
+                raise ModelNotFoundError(
+                    f"Model {self.model_name} not found. Please use `DartmouthLLM.list()` "
+                    "to verify the model name."
+                )
 
 
 def DartmouthChatModel(*args, **kwargs):
@@ -440,6 +478,11 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
         """
         try:
             return super().invoke(*args, **kwargs)
+        except NotFoundError:
+            raise ModelNotFoundError(
+                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
+                "to verify the model name."
+            )
         except Exception:
             self.authenticate(jwt_url=self.jwt_url)
             return super().invoke(*args, **kwargs)
@@ -455,6 +498,11 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
         try:
             response = await super().ainvoke(*args, **kwargs)
             return response
+        except NotFoundError:
+            raise ModelNotFoundError(
+                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
+                "to verify the model name."
+            )
         except Exception:
             self.authenticate(jwt_url=self.jwt_url)
             response = await super().ainvoke(*args, **kwargs)
@@ -464,6 +512,11 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
         try:
             for chunk in super().stream(*args, **kwargs):
                 yield chunk
+        except NotFoundError:
+            raise ModelNotFoundError(
+                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
+                "to verify the model name."
+            )
         except Exception:
             self.authenticate(jwt_url=self.jwt_url)
             for chunk in super().stream(*args, **kwargs):
@@ -473,6 +526,11 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
         try:
             async for chunk in super().astream(*args, **kwargs):
                 yield chunk
+        except NotFoundError:
+            raise ModelNotFoundError(
+                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
+                "to verify the model name."
+            )
         except Exception:
             self.authenticate(jwt_url=self.jwt_url)
             async for chunk in super().astream(*args, **kwargs):
@@ -481,6 +539,11 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
     def generate(self, *args, **kwargs) -> LLMResult:
         try:
             return super().generate(*args, **kwargs)
+        except NotFoundError:
+            raise ModelNotFoundError(
+                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
+                "to verify the model name."
+            )
         except Exception:
             self.authenticate(jwt_url=self.jwt_url)
             return super().generate(*args, **kwargs)
@@ -489,6 +552,11 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
         try:
             response = await super().agenerate(*args, **kwargs)
             return response
+        except NotFoundError:
+            raise ModelNotFoundError(
+                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
+                "to verify the model name."
+            )
         except Exception:
             self.authenticate(jwt_url=self.jwt_url)
             response = await super().agenerate(*args, **kwargs)
@@ -675,7 +743,16 @@ class ChatDartmouthCloud(ChatOpenAI):
         :return: The LLM's response to the prompt.
         :rtype: BaseMessage
         """
-        return super().invoke(*args, **kwargs)
+        try:
+            return super().invoke(*args, **kwargs)
+        except BadRequestError as e:
+            if "model not found" in str(e).lower():
+                raise ModelNotFoundError(
+                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    "to verify the model name."
+                )
+            else:
+                raise e
 
     async def ainvoke(self, *args, **kwargs) -> BaseMessage:
         """Asynchronously invokes the model to get a response to a query.
@@ -685,23 +762,68 @@ class ChatDartmouthCloud(ChatOpenAI):
         :return: The LLM's response to the prompt.
         :rtype: BaseMessage
         """
-        response = await super().ainvoke(*args, **kwargs)
-        return response
+        try:
+            response = await super().ainvoke(*args, **kwargs)
+            return response
+        except BadRequestError as e:
+            if "model not found" in str(e).lower():
+                raise ModelNotFoundError(
+                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    "to verify the model name."
+                )
+            else:
+                raise e
 
     def stream(self, *args, **kwargs) -> Iterator[BaseMessageChunk]:
-        for chunk in super().stream(*args, **kwargs):
-            yield chunk
+        try:
+            for chunk in super().stream(*args, **kwargs):
+                yield chunk
+        except BadRequestError as e:
+            if "model not found" in str(e).lower():
+                raise ModelNotFoundError(
+                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    "to verify the model name."
+                )
+            else:
+                raise e
 
     async def astream(self, *args, **kwargs) -> AsyncIterator[BaseMessageChunk]:
-        async for chunk in super().astream(*args, **kwargs):
-            yield chunk
+        try:
+            async for chunk in super().astream(*args, **kwargs):
+                yield chunk
+        except BadRequestError as e:
+            if "model not found" in str(e).lower():
+                raise ModelNotFoundError(
+                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    "to verify the model name."
+                )
+            else:
+                raise e
 
     def generate(self, *args, **kwargs) -> LLMResult:
-        return super().generate(*args, **kwargs)
+        try:
+            return super().generate(*args, **kwargs)
+        except BadRequestError as e:
+            if "model not found" in str(e).lower():
+                raise ModelNotFoundError(
+                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    "to verify the model name."
+                )
+            else:
+                raise e
 
     async def agenerate(self, *args, **kwargs) -> LLMResult:
-        response = await super().agenerate(*args, **kwargs)
-        return response
+        try:
+            response = await super().agenerate(*args, **kwargs)
+            return response
+        except BadRequestError as e:
+            if "model not found" in str(e).lower():
+                raise ModelNotFoundError(
+                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    "to verify the model name."
+                )
+            else:
+                raise e
 
 
 if __name__ == "__main__":

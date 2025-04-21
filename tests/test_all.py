@@ -7,6 +7,7 @@ from langchain_dartmouth.llms import (
     ChatDartmouthCloud,
 )
 from langchain_dartmouth.embeddings import DartmouthEmbeddings
+from langchain_dartmouth.exceptions import ModelNotFoundError
 from langchain_dartmouth.cross_encoders import TextEmbeddingInferenceClient
 from langchain_dartmouth.retrievers.document_compressors import (
     TeiCrossEncoderReranker,
@@ -80,6 +81,27 @@ def test_chat_dartmouth_cloud(model_name, expected):
         llm = ChatDartmouthCloud(model_name=model_name, seed=42)
     response = llm.invoke("Who are you?")
     assert expected in response.content
+
+
+def test_dartmouth_llm_bad_name():
+    llm = DartmouthLLM(model_name="Bad name")
+
+    with pytest.raises(ModelNotFoundError):
+        llm.invoke("Who are you?")
+
+
+def test_chat_dartmouth_bad_name():
+    llm = ChatDartmouth(model_name="Bad name")
+
+    with pytest.raises(ModelNotFoundError):
+        llm.invoke("Who are you?")
+
+
+def test_chat_dartmouth_cloud_bad_name():
+    llm = ChatDartmouthCloud(model_name="Bad name")
+
+    with pytest.raises(ModelNotFoundError):
+        llm.invoke("Who are you?")
 
 
 @pytest.mark.parametrize(
