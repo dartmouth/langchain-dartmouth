@@ -4,7 +4,7 @@ from langchain_core.callbacks import (
 )
 from langchain_community.llms import HuggingFaceTextGenInference
 from langchain_core.outputs import LLMResult
-from pydantic import Field
+from pydantic import Field, model_validator
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_core.messages import BaseMessage, BaseMessageChunk
 from langchain_core.outputs import GenerationChunk
@@ -29,7 +29,7 @@ from typing import (
     List,
     Optional,
 )
-
+import warnings
 
 class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
     r"""
@@ -265,9 +265,7 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
 
 
 def DartmouthChatModel(*args, **kwargs):
-    from warnings import warn
-
-    warn(
+    warnings.warn(
         "DartmouthChatModel is deprecated and will be removed in a future update. Use `DartmouthLLM` (as a drop-in replacement) or `ChatDartmouth` instead!"
     )
     return DartmouthLLM(*args, **kwargs)
@@ -556,7 +554,7 @@ class ChatDartmouthCloud(ChatOpenAI):
     """
 
     dartmouth_chat_api_key: Optional[str] = None
-    temperature: float = 0.7
+    temperature: float | None = 0.7
     max_tokens: int = 512
     stream_usage: bool = False
     presence_penalty: Optional[float] = None
@@ -570,6 +568,20 @@ class ChatDartmouthCloud(ChatOpenAI):
     top_p: Optional[float] = None
     model_kwargs: Optional[dict] = None
     model_name: str = Field(default="openai.gpt-4o-mini-2024-07-18")
+
+    @model_validator(mode="before")
+    @classmethod
+    def validate_temperature(cls, values: dict[str, Any]) -> Any:
+        """Currently o models only allow temperature=1."""
+        model = values.get("model_name") or values.get("model") or ""
+        if model.startswith("openai.o"):
+            if "temperature" in values:
+                warnings.warn(
+                    f"{model} does not support setting the temperature. Forcing"
+                    f"`temperature` to 1 (instead of {values['temperature']})."
+                )
+            values["temperature"] = 1
+        return values
 
     def __init__(
         self,

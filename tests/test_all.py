@@ -46,22 +46,18 @@ def test_chat_dartmouth():
     assert len(ChatDartmouth.list()) > 0
 
 
-def test_chat_dartmouth_cloud():
-    llm = ChatDartmouthCloud(temperature=0.0, seed=42)
+@pytest.mark.parametrize(
+    "model_name, expected",
+    [
+        ("openai.o4-mini-2025-04-16", "OpenAI"),
+        ("mistral.mistral-small-2503", "Mistral"),
+        ("google_genai.gemini-1.5-pro-002", "Google"),
+    ],
+)
+def test_chat_dartmouth_cloud(model_name, expected):
+    llm = ChatDartmouthCloud(model_name=model_name, seed=42)
     response = llm.invoke("Who are you?")
-    assert "OpenAI" in response.content
-
-    llm = ChatDartmouthCloud(
-        model_name="mistral.mistral-small-2409", temperature=0.0, seed=42
-    )
-    response = llm.invoke("Who are you?")
-    assert "Mistral" in response.content
-
-    llm = ChatDartmouthCloud(
-        model_name="google_genai.gemini-1.5-pro-002", temperature=0.0, seed=42
-    )
-    response = llm.invoke("Who are you?")
-    assert "Google" in response.content
+    assert expected in response.content
 
     assert len(ChatDartmouthCloud.list()) > 0
 
