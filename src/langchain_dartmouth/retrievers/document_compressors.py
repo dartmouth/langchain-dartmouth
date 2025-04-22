@@ -143,7 +143,7 @@ class DartmouthReranker(TeiCrossEncoderReranker, AuthenticatedMixin):
             raise KeyError(
                 "Dartmouth API key not provided as argument or defined as environment variable 'DARTMOUTH_API_KEY'."
             ) from e
-        listing = DartmouthModelListing(api_key=dartmouth_api_key, url=RERANK_BASE_URL)
+        listing = DartmouthModelListing(api_key=dartmouth_api_key, url=url)
         models = listing.list(server="text-embeddings-inference", type="reranking")
         return models
 
