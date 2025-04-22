@@ -584,7 +584,7 @@ class ChatDartmouthCloud(ChatOpenAI):
 
     Use this class if you want to use a model by a third-party provider, e.g., Anthropic or OpenAI, made accessible by Dartmouth.
 
-    :param model_name: Name of the model to use, defaults to ``"openai.gpt-4o-mini-2024-07-18"``.
+    :param model_name: Name of the model to use, defaults to ``"openai.gpt-4.1-mini-2025-04-14"``.
     :type model_name: str
     :param streaming: Whether to stream the results or not, defaults to ``False``.
     :type streaming: bool
