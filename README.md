@@ -45,7 +45,7 @@ All of these components are based on corresponding LangChain base classes and ca
 
 There are three kinds of Large Language Models (LLMs) provided by Dartmouth:
 
-- On-premise:
+- On-premises:
   - Base models without instruction tuning (require no special prompt format)
   - Instruction-tuned models (also known as Chat models) requiring [specific prompt formats](https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-3/)
 - Cloud:
