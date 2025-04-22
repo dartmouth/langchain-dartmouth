@@ -1,3 +1,4 @@
+from huggingface_hub import inference
 from langchain_core.callbacks import (
     AsyncCallbackManagerForLLMRun,
     CallbackManagerForLLMRun,
@@ -8,7 +9,12 @@ from pydantic import Field, model_validator
 from langchain_openai.chat_models import ChatOpenAI
 from langchain_core.messages import BaseMessage, BaseMessageChunk
 from langchain_core.outputs import GenerationChunk
-from langchain_dartmouth.definitions import LLM_BASE_URL, CLOUD_BASE_URL, USER_AGENT
+from langchain_dartmouth.definitions import (
+    LLM_BASE_URL,
+    CLOUD_BASE_URL,
+    USER_AGENT,
+    MODEL_LISTING_BASE_URL,
+)
 from langchain_dartmouth.base import AuthenticatedMixin
 from langchain_dartmouth.exceptions import ModelNotFoundError
 from langchain_dartmouth.model_listing import (
@@ -186,11 +192,15 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
         self.authenticate(jwt_url=self.jwt_url)
 
     @staticmethod
-    def list(dartmouth_api_key: str = None) -> list[dict]:
+    def list(
+        dartmouth_api_key: str = None, url: str = MODEL_LISTING_BASE_URL
+    ) -> list[dict]:
         """List the models available through ``DartmouthLLM``.
 
         :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
         :type dartmouth_api_key: str, optional
+        :param url: URL of the listing server
+        :type url: str, optional
         :return: A list of descriptions of the available models
         :rtype: list[dict]
         """
@@ -201,7 +211,7 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
             raise KeyError(
                 "Dartmouth API key not provided as argument or defined as environment variable 'DARTMOUTH_API_KEY'."
             ) from e
-        listing = DartmouthModelListing(api_key=dartmouth_api_key)
+        listing = DartmouthModelListing(api_key=dartmouth_api_key, url=url)
         models = listing.list(server="text-generation-inference", type="llm")
         return models
 
@@ -449,11 +459,15 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
         self.authenticate(jwt_url=self.jwt_url)
 
     @staticmethod
-    def list(dartmouth_api_key: str = None) -> list[dict]:
+    def list(
+        dartmouth_api_key: str = None, url: str = MODEL_LISTING_BASE_URL
+    ) -> list[dict]:
         """List the models available through ``ChatDartmouth``.
 
         :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
         :type dartmouth_api_key: str, optional
+        :param url: URL of the listing server
+        :type url: str, optional
         :return: A list of descriptions of the available models
         :rtype: list[dict]
         """
@@ -464,7 +478,7 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
             raise KeyError(
                 "Dartmouth API key not provided as argument or defined as environment variable 'DARTMOUTH_API_KEY'."
             ) from e
-        listing = DartmouthModelListing(api_key=dartmouth_api_key)
+        listing = DartmouthModelListing(api_key=dartmouth_api_key, url=url)
         models = listing.list(
             server="text-generation-inference", type="llm", capabilities=["chat"]
         )
@@ -600,6 +614,8 @@ class ChatDartmouthCloud(ChatOpenAI):
     :type model_kwargs: dict, optional
     :param dartmouth_chat_api_key: A Dartmouth Chat API key (see `here <https://rcweb.dartmouth.edu/~d20964h/2024-12-11-dartmouth-chat-api/api_key/>`_ for how to obtain one). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
     :type dartmouth_chat_api_key: str, optional
+    :param inference_server_url: The URL of the inference server (e.g., https://chat.dartmouth.edu/api/)
+    :type inference_server_url: str, optional
     :param \**_: Additional keyword arguments are silently discarded. This is to ensure interface compatibility with other langchain components.
 
 
@@ -637,7 +653,7 @@ class ChatDartmouthCloud(ChatOpenAI):
     n: int = 1
     top_p: Optional[float] = None
     model_kwargs: Optional[dict] = None
-    model_name: str = Field(default="openai.gpt-4o-mini-2024-07-18")
+    model_name: str = Field(default="openai.gpt-4.1-mini-2025-04-14")
 
     @model_validator(mode="before")
     @classmethod
@@ -670,7 +686,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         top_p: Optional[float] = None,
         model_kwargs: Optional[dict] = None,
         dartmouth_chat_api_key: Optional[str] = None,
-        **_,
+        inference_server_url: Optional[str] = None,
     ):
         # Explicitly pass kwargs to control which ones show up in the documentation
         kwargs = {
@@ -690,7 +706,10 @@ class ChatDartmouthCloud(ChatOpenAI):
         }
         kwargs["default_headers"] = {"User-Agent": USER_AGENT}
         kwargs["model_name"] = model_name
-        kwargs["openai_api_base"] = f"{CLOUD_BASE_URL}"
+        if inference_server_url is not None:
+            kwargs["openai_api_base"] = inference_server_url
+        else:
+            kwargs["openai_api_base"] = f"{CLOUD_BASE_URL}"
         if dartmouth_chat_api_key is None:
             try:
                 dartmouth_chat_api_key = os.environ["DARTMOUTH_CHAT_API_KEY"]
@@ -709,11 +728,15 @@ class ChatDartmouthCloud(ChatOpenAI):
         self.dartmouth_chat_api_key = dartmouth_chat_api_key
 
     @staticmethod
-    def list(dartmouth_chat_api_key: str = None) -> list[dict]:
+    def list(
+        dartmouth_chat_api_key: str = None, url: str = CLOUD_BASE_URL
+    ) -> list[dict]:
         """List the models available through ``ChatDartmouthCloud``.
 
         :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
         :type dartmouth_chat_api_key: str, optional
+        :param url: URL of the listing server
+        :type url: str, optional
         :return: A list of descriptions of the available models
         :rtype: list[dict]
         """
@@ -724,7 +747,7 @@ class ChatDartmouthCloud(ChatOpenAI):
             raise KeyError(
                 "Dartmouth Chat API key not provided as argument or defined as environment variable 'DARTMOUTH_CHAT_API_KEY'."
             ) from e
-        listing = CloudModelListing(api_key=dartmouth_chat_api_key)
+        listing = CloudModelListing(api_key=dartmouth_chat_api_key, url=url)
         models = listing.list()
 
         # Filter out some models better accessed through other means

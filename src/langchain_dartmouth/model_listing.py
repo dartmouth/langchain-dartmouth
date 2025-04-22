@@ -15,10 +15,11 @@ from typing import Literal, List
 
 class BaseModelListing:
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, url: str):
         self.api_key = api_key
         self.SESSION = requests.Session()
         self.SESSION.headers.update({"User-Agent": USER_AGENT})
+        self.url = url
         self._authenticate()
 
     def _authenticate(self):
@@ -37,7 +38,7 @@ class DartmouthModelListing(BaseModelListing):
             {"Authorization": f"Bearer {get_jwt(dartmouth_api_key=self.api_key)}"}
         )
 
-    def list(self, url: str = MODEL_LISTING_BASE_URL, **kwargs) -> List[dict]:
+    def list(self, **kwargs) -> List[dict]:
         """Get a list of available on-premise models.
 
         Optionally filter by various parameters.
@@ -54,10 +55,10 @@ class DartmouthModelListing(BaseModelListing):
             params["capability"] = kwargs["capabilities"]
 
         try:
-            resp = self.SESSION.get(url=url + "list", params=params)
+            resp = self.SESSION.get(url=self.url + "list", params=params)
         except Exception:
             self._authenticate()
-            resp = self.SESSION.get(url=url + "list")
+            resp = self.SESSION.get(url=self.url + "list")
 
         resp.raise_for_status()
         return resp.json()["models"]
@@ -67,7 +68,7 @@ class CloudModelListing(BaseModelListing):
     def _authenticate(self):
         self.SESSION.headers.update({"Authorization": f"Bearer {self.api_key}"})
 
-    def list(self, url: str = CLOUD_BASE_URL, base_only: bool = False) -> List[dict]:
+    def list(self, base_only: bool = False) -> List[dict]:
         """Get a list of available Cloud models.
 
         :param base_only: Whether return only base models or customized models, defaults to False
@@ -75,7 +76,7 @@ class CloudModelListing(BaseModelListing):
         :return: List of model descriptions
         :rtype: List[dict]
         """
-        resp = self.SESSION.get(url=url + f"models{'/base' if base_only else ''}")
+        resp = self.SESSION.get(url=self.url + f"models{'/base' if base_only else ''}")
         resp.raise_for_status()
         return resp.json()["data"]
 

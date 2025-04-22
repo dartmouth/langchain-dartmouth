@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from langchain_dartmouth.llms import (
@@ -81,6 +83,21 @@ def test_chat_dartmouth_cloud(model_name, expected):
         llm = ChatDartmouthCloud(model_name=model_name, seed=42)
     response = llm.invoke("Who are you?")
     assert expected in response.content
+
+
+def test_chat_dartmouth_cloud_url():
+    DEV_URL = "https://chat-dev.dartmouth.edu/api/"
+    DEV_KEY = os.environ.get("DARTMOUTH_CHAT_DEV_API_KEY")
+    if DEV_KEY is None:
+        pytest.skip("No DARTMOUTH_CHAT_DEV_API_KEY available.")
+    model = "anthropic.claude-3-7-sonnet-20250219"
+    llm = ChatDartmouthCloud(
+        model_name=model,
+        inference_server_url=DEV_URL,
+        dartmouth_chat_api_key=DEV_KEY,
+    )
+    response = llm.invoke("Are you there? Answer yes or no.")
+    assert "yes" in response.content.lower()
 
 
 def test_dartmouth_llm_bad_name():
