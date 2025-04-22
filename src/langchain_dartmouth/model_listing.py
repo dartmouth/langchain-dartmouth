@@ -1,6 +1,10 @@
 """Helper class to interact with the model listing API"""
 
-from langchain_dartmouth.definitions import MODEL_LISTING_BASE_URL, CLOUD_BASE_URL
+from langchain_dartmouth.definitions import (
+    MODEL_LISTING_BASE_URL,
+    CLOUD_BASE_URL,
+    USER_AGENT,
+)
 
 
 import requests
@@ -11,9 +15,11 @@ from typing import Literal, List
 
 class BaseModelListing:
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, url: str):
         self.api_key = api_key
         self.SESSION = requests.Session()
+        self.SESSION.headers.update({"User-Agent": USER_AGENT})
+        self.url = url
         self._authenticate()
 
     def _authenticate(self):
@@ -49,10 +55,10 @@ class DartmouthModelListing(BaseModelListing):
             params["capability"] = kwargs["capabilities"]
 
         try:
-            resp = self.SESSION.get(url=MODEL_LISTING_BASE_URL + "list", params=params)
+            resp = self.SESSION.get(url=self.url + "list", params=params)
         except Exception:
             self._authenticate()
-            resp = self.SESSION.get(url=MODEL_LISTING_BASE_URL + "list")
+            resp = self.SESSION.get(url=self.url + "list")
 
         resp.raise_for_status()
         return resp.json()["models"]
@@ -70,9 +76,7 @@ class CloudModelListing(BaseModelListing):
         :return: List of model descriptions
         :rtype: List[dict]
         """
-        resp = self.SESSION.get(
-            url=CLOUD_BASE_URL + f"models{'/base' if base_only else ''}"
-        )
+        resp = self.SESSION.get(url=self.url + f"models{'/base' if base_only else ''}")
         resp.raise_for_status()
         return resp.json()["data"]
 

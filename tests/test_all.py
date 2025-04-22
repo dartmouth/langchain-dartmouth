@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from langchain_dartmouth.llms import (
@@ -7,6 +9,7 @@ from langchain_dartmouth.llms import (
     ChatDartmouthCloud,
 )
 from langchain_dartmouth.embeddings import DartmouthEmbeddings
+from langchain_dartmouth.exceptions import ModelNotFoundError
 from langchain_dartmouth.cross_encoders import TextEmbeddingInferenceClient
 from langchain_dartmouth.retrievers.document_compressors import (
     TeiCrossEncoderReranker,
@@ -29,6 +32,16 @@ def test_dartmouth_llm():
     assert len(DartmouthLLM.list()) > 0
 
 
+@pytest.mark.parametrize(
+    "model",
+    [model["name"] for model in DartmouthLLM.list()],
+)
+def test_dartmouth_llm_list(model):
+    llm = DartmouthLLM(model_name=model, max_new_tokens=16)
+    response = llm.invoke("Hi there")
+    assert len(response) > 0
+
+
 def test_chat_dartmouth():
     llm = ChatDartmouth(model_name="llama-3-8b-instruct")
     response = llm.invoke("Please respond with the single word OK")
@@ -43,27 +56,79 @@ def test_chat_dartmouth():
     )
     assert response.content
 
-    assert len(ChatDartmouth.list()) > 0
+
+@pytest.mark.parametrize(
+    "model",
+    [model["name"] for model in ChatDartmouth.list()],
+)
+def test_chat_dartmouth_list(model):
+    llm = ChatDartmouth(model_name=model)
+    response = llm.invoke("Are you there? Say yes or no")
+    assert "yes" in response.content.lower(), f"Model {model} did not respond."
 
 
-def test_chat_dartmouth_cloud():
-    llm = ChatDartmouthCloud(temperature=0.0, seed=42)
+@pytest.mark.parametrize(
+    "model_name, expected",
+    [
+        ("default", "OpenAI"),
+        ("openai.o4-mini-2025-04-16", "OpenAI"),
+        ("mistral.mistral-small-2503", "Mistral"),
+        ("google_genai.gemini-1.5-pro-002", "Google"),
+    ],
+)
+def test_chat_dartmouth_cloud(model_name, expected):
+    if model_name == "default":
+        llm = ChatDartmouthCloud(seed=42)
+    else:
+        llm = ChatDartmouthCloud(model_name=model_name, seed=42)
     response = llm.invoke("Who are you?")
-    assert "OpenAI" in response.content
+    assert expected in response.content
 
+
+def test_chat_dartmouth_cloud_url():
+    DEV_URL = "https://chat-dev.dartmouth.edu/api/"
+    DEV_KEY = os.environ.get("DARTMOUTH_CHAT_DEV_API_KEY")
+    if DEV_KEY is None:
+        pytest.skip("No DARTMOUTH_CHAT_DEV_API_KEY available.")
+    model = "anthropic.claude-3-7-sonnet-20250219"
     llm = ChatDartmouthCloud(
-        model_name="mistral.mistral-small-2409", temperature=0.0, seed=42
+        model_name=model,
+        inference_server_url=DEV_URL,
+        dartmouth_chat_api_key=DEV_KEY,
     )
-    response = llm.invoke("Who are you?")
-    assert "Mistral" in response.content
+    response = llm.invoke("Are you there? Answer yes or no.")
+    assert "yes" in response.content.lower()
 
-    llm = ChatDartmouthCloud(
-        model_name="google_genai.gemini-1.5-pro-002", temperature=0.0, seed=42
-    )
-    response = llm.invoke("Who are you?")
-    assert "Google" in response.content
 
-    assert len(ChatDartmouthCloud.list()) > 0
+def test_dartmouth_llm_bad_name():
+    llm = DartmouthLLM(model_name="Bad name")
+
+    with pytest.raises(ModelNotFoundError):
+        llm.invoke("Who are you?")
+
+
+def test_chat_dartmouth_bad_name():
+    llm = ChatDartmouth(model_name="Bad name")
+
+    with pytest.raises(ModelNotFoundError):
+        llm.invoke("Who are you?")
+
+
+def test_chat_dartmouth_cloud_bad_name():
+    llm = ChatDartmouthCloud(model_name="Bad name")
+
+    with pytest.raises(ModelNotFoundError):
+        llm.invoke("Who are you?")
+
+
+@pytest.mark.parametrize(
+    "model",
+    [model["name"] for model in ChatDartmouthCloud.list()],
+)
+def test_chat_dartmouth_cloud_list(model):
+    llm = ChatDartmouthCloud(model_name=model)
+    response = llm.invoke("Are you there? Say yes or no")
+    assert "yes" in response.content.lower(), f"Model {model} did not respond."
 
 
 def test_dartmouth_chat():
@@ -88,13 +153,6 @@ def test_dartmouth_embeddings():
     result = embeddings.embed_query("Is there anybody out there?")
     assert result
 
-    embeddings = DartmouthEmbeddings(
-        jwt_url="https://api-dev.dartmouth.edu/api/jwt",
-        embeddings_server_url="https://ai-api-dev.dartmouth.edu/tei/",
-    )
-    result = embeddings.embed_query("Is there anybody out there?")
-    assert result
-
     assert len(DartmouthEmbeddings.list()) > 0
 
 
@@ -109,14 +167,6 @@ def test_dartmouth_reranker():
     assert ranked_docs
 
     reranker = DartmouthReranker(top_n=1)
-    ranked_docs = reranker.compress_documents(query=query, documents=docs)
-    assert len(ranked_docs) == 1
-
-    reranker = DartmouthReranker(
-        top_n=1,
-        jwt_url="https://api-dev.dartmouth.edu/api/jwt",
-        embeddings_server_url="https://ai-api-dev.dartmouth.edu/tei/",
-    )
     ranked_docs = reranker.compress_documents(query=query, documents=docs)
     assert len(ranked_docs) == 1
 

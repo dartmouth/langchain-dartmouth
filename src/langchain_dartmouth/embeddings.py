@@ -1,10 +1,11 @@
+from langchain_dartmouth.definitions import USER_AGENT
 from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
 
 import os
 from typing import Callable, List, Optional
 
 from langchain_dartmouth.base import AuthenticatedMixin
-from langchain_dartmouth.definitions import EMBEDDINGS_BASE_URL
+from langchain_dartmouth.definitions import EMBEDDINGS_BASE_URL, MODEL_LISTING_BASE_URL
 from langchain_dartmouth.model_listing import DartmouthModelListing
 
 
@@ -61,16 +62,22 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
         else:
             endpoint = f"{EMBEDDINGS_BASE_URL}{model_name}/"
         super().__init__(model=endpoint, model_kwargs=model_kwargs)
+        self.client.headers.update({"User-Agent": USER_AGENT})
+        self.async_client.headers.update({"User-Agent": USER_AGENT})
         self.authenticator = authenticator
         self.dartmouth_api_key = dartmouth_api_key
         self.authenticate(jwt_url=jwt_url)
 
     @staticmethod
-    def list(dartmouth_api_key: str = None) -> list[dict]:
+    def list(
+        dartmouth_api_key: str = None, url: str = MODEL_LISTING_BASE_URL
+    ) -> list[dict]:
         """List the models available through ``DartmouthEmbeddings``.
 
         :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
         :type dartmouth_api_key: str, optional
+        :param url: URL of the listing server
+        :type url: str, optional
         :return: A list of descriptions of the available models
         :rtype: list[dict]
         """
@@ -81,7 +88,7 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
             raise KeyError(
                 "Dartmouth API key not provided as argument or defined as environment variable 'DARTMOUTH_API_KEY'."
             ) from e
-        listing = DartmouthModelListing(api_key=dartmouth_api_key)
+        listing = DartmouthModelListing(api_key=dartmouth_api_key, url=url)
         models = listing.list(server="text-embeddings-inference", type="embedding")
         return models
 
@@ -144,6 +151,7 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
             self.authenticate(jwt_url=self.jwt_url)
             response = await super().aembed_documents(texts)
             return response
+
 
 if __name__ == "__main__":
     print(DartmouthEmbeddings.list())

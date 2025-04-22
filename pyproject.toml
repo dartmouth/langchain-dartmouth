@@ -1,6 +1,6 @@
 [project]
 name = "langchain_dartmouth"
-version = "0.2.13"
+dynamic = ["version"]
 authors = [
   { name="Simon Stone", email="simon.stone@dartmouth.edu" },
 ]
@@ -47,3 +47,6 @@ addopts = "-ra -q"
 testpaths =[
    "tests"
 ]
+
+[tool.hatch.version]
+path = "src/langchain_dartmouth/_version.py"
