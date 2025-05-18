@@ -148,6 +148,13 @@ def test_dartmouth_chat():
     print(llm.invoke("<s>[INST]Hello[/INST]"))
 
 
+def test_streaming():
+    chunks = []
+    for chunk in ChatDartmouthCloud(seed=42).stream("Hi there!"):
+        chunks.append(chunk)
+    assert len(chunks) > 0
+
+
 def test_dartmouth_embeddings():
     embeddings = DartmouthEmbeddings()
     result = embeddings.embed_query("Is there anybody out there?")
