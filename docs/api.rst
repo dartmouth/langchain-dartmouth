@@ -18,3 +18,8 @@ Reranking
 .. automodule:: langchain_dartmouth.retrievers.document_compressors
     :members:
     :exclude-members: TeiCrossEncoderReranker
+
+Base URLs
+===================
+.. automodule:: langchain_dartmouth.definitions
+    :members:

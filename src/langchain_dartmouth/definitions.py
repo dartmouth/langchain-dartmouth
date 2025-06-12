@@ -1,7 +1,7 @@
 """Configuration definitions for langchain_dartmouth.
 
 This module contains base URLs and configuration constants used throughout
-the langchain_dartmouth library. All URLs can be overridden via environment
+the ``langchain_dartmouth`` library. All URLs can be overridden via environment
 variables.
 """
 
@@ -53,8 +53,3 @@ Defaults to ``https://api.dartmouth.edu/api/ai/models/``.
 """
 
 USER_AGENT = f"langchain_dartmouth/Python {__version__}"
-"""str: User agent string used for HTTP requests.
-
-Automatically constructed using the library name and version number.
-Format: ``langchain_dartmouth/Python {version}``.
-"""
