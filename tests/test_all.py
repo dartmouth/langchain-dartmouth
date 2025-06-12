@@ -129,6 +129,15 @@ def test_chat_dartmouth_cloud_list(model):
     assert "yes" in response.content.lower(), f"Model {model} did not respond."
 
 
+def test_litellm_model_list():
+    models = ChatDartmouthCloud.list(
+        dartmouth_chat_api_key=os.environ["LITELLM_TEAM_API_KEY"],
+        url=os.environ["LITELLM_BASE_URL"],
+    )
+    # There should only be three models available to this team
+    assert len(models) == 3
+
+
 def test_dartmouth_chat():
     llm = DartmouthChatModel(model_name="llama-3-8b-instruct", temperature=0.01)
     response = llm.invoke(
