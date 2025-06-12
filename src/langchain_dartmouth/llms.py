@@ -729,7 +729,7 @@ class ChatDartmouthCloud(ChatOpenAI):
 
     @staticmethod
     def list(
-        dartmouth_chat_api_key: str = None, url: str = CLOUD_BASE_URL
+        dartmouth_chat_api_key: str | None = None, url: str = CLOUD_BASE_URL
     ) -> list[dict]:
         """List the models available through ``ChatDartmouthCloud``.
 

@@ -100,9 +100,14 @@ def reformat_model_spec(model_spec: dict) -> dict:
             capabilities.append("vision")
         return capabilities
 
-    new_spec["capabilities"] = get_capablities(
-        model_spec["info"]["meta"]["capabilities"]
-    )
+    try:
+        new_spec["capabilities"] = get_capablities(
+            model_spec["info"]["meta"]["capabilities"]
+        )
+    except KeyError:
+        # Some /models endpoints don't provide the "info" key
+        pass
+
     new_spec["server"] = "dartmouth-chat"
     new_spec["parameters"] = dict()
     return new_spec

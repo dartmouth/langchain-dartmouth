@@ -40,3 +40,5 @@ jobs:
       env:
         DARTMOUTH_API_KEY: ${{ secrets.DARTMOUTH_API_KEY }}
         DARTMOUTH_CHAT_API_KEY: ${{ secrets.DARTMOUTH_CHAT_API_KEY }}
+        LITELLM_TEAM_API_KEY: ${{ secrets.LITELLM_TEAM_API_KEY }}
+        LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
