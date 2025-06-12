@@ -18,12 +18,11 @@ dependencies = [
     "dartmouth-auth",
     "langchain",
     "langchain_community",
-    "langchain_huggingface",
-    "huggingface-hub==0.26.3",
+    "huggingface-hub",
     "langchain_openai",
     "text_generation",
     "python-dotenv",
-
+    "langchain-huggingface",
 ]
 license = {file = "LICENSE"}
 
@@ -50,3 +49,6 @@ testpaths =[
 
 [tool.hatch.version]
 path = "src/langchain_dartmouth/_version.py"
+
+[tool.uv.sources]
+langchain-huggingface = { path = "../langchain/libs/partners/huggingface" }
