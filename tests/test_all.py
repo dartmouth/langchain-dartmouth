@@ -79,7 +79,7 @@ def test_chat_dartmouth_cloud(model_name, expected):
         llm = ChatDartmouthCloud()
     else:
         llm = ChatDartmouthCloud(model_name=model_name)
-    response = llm.invoke("Who are you?")
+    response = llm.invoke("Who are you? Who made you?")
     assert expected.split("_")[0] in response.content.lower()
 
 
