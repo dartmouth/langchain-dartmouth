@@ -16,7 +16,7 @@ from langchain_dartmouth.definitions import (
     MODEL_LISTING_BASE_URL,
 )
 from langchain_dartmouth.base import AuthenticatedMixin
-from langchain_dartmouth.exceptions import ModelNotFoundError
+from langchain_dartmouth.exceptions import InvalidKeyError, ModelNotFoundError
 from langchain_dartmouth.model_listing import (
     DartmouthModelListing,
     CloudModelListing,
@@ -27,6 +27,7 @@ from openai import (
     DefaultHttpxClient,
     DefaultAsyncHttpxClient,
     BadRequestError,
+    APIStatusError,
     NotFoundError,
 )
 
@@ -771,12 +772,14 @@ class ChatDartmouthCloud(ChatOpenAI):
         """
         try:
             return super().invoke(*args, **kwargs)
-        except BadRequestError as e:
+        except APIStatusError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
                     f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
                     "to verify the model name."
                 )
+            elif e.status_code == 401:  # Unauthorized
+                raise InvalidKeyError("API key invalid!")
             else:
                 raise e
 

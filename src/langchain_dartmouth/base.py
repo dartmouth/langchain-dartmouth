@@ -1,16 +1,20 @@
 import dartmouth_auth
-
+from langchain_dartmouth.exceptions import InvalidKeyError
 
 class AuthenticatedMixin:
     """A mix-in class to faciliate authentication"""
 
     def authenticate(self, jwt_url=None):
-        if self.authenticator:
-            jwt = self.authenticator()
-        else:
-            jwt = dartmouth_auth.get_jwt(
-                dartmouth_api_key=self.dartmouth_api_key, jwt_url=jwt_url
-            )
+        try:
+            if self.authenticator:
+                jwt = self.authenticator()
+            else:
+                jwt = dartmouth_auth.get_jwt(
+                    dartmouth_api_key=self.dartmouth_api_key, jwt_url=jwt_url
+                )
+        except KeyError as e:
+            raise InvalidKeyError from e
+
         auth_header = {"Authorization": f"Bearer {jwt}"}
         self._set_extra_headers(auth_header)
 
