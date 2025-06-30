@@ -9,7 +9,7 @@ from langchain_dartmouth.llms import (
     ChatDartmouthCloud,
 )
 from langchain_dartmouth.embeddings import DartmouthEmbeddings
-from langchain_dartmouth.exceptions import ModelNotFoundError
+from langchain_dartmouth.exceptions import InvalidKeyError, ModelNotFoundError
 from langchain_dartmouth.cross_encoders import TextEmbeddingInferenceClient
 from langchain_dartmouth.retrievers.document_compressors import (
     TeiCrossEncoderReranker,
@@ -112,10 +112,22 @@ def test_chat_dartmouth_bad_name():
         llm.invoke("Who are you?")
 
 
+def test_chat_dartmouth_bad_key():
+    with pytest.raises(InvalidKeyError):
+        ChatDartmouth(dartmouth_api_key="Bad")
+
+
 def test_chat_dartmouth_cloud_bad_name():
     llm = ChatDartmouthCloud(model_name="Bad name")
 
     with pytest.raises(ModelNotFoundError):
+        llm.invoke("Who are you?")
+
+
+def test_chat_dartmouth_cloud_bad_key():
+    llm = ChatDartmouthCloud(dartmouth_chat_api_key="Bad")
+
+    with pytest.raises(InvalidKeyError):
         llm.invoke("Who are you?")
 
 
