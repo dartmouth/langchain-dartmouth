@@ -88,8 +88,13 @@ def test_chat_dartmouth_cloud(model_name, expected):
     if model_name == "default":
         llm = ChatDartmouthCloud()
     else:
-        llm = ChatDartmouthCloud(model_name=model_name)
-    response = llm.invoke("Who are you? Who made you?")
+        if "gemini" in model_name.lower():
+            # Gemini reasoning models with default settings often need too many tokens for reasoning to produce output
+            llm = ChatDartmouthCloud(model_name=model_name, max_tokens=1024)
+            response = llm.invoke("Who are you? Who made you?", reasoning_effort="low")
+        else:
+            llm = ChatDartmouthCloud(model_name=model_name)
+            response = llm.invoke("Who are you? Who made you?")
     assert expected.split("_")[0] in response.content.lower()
 
 
