@@ -111,6 +111,8 @@ def test_chat_dartmouth_cloud_url():
 def test_chat_dartmouth_cloud_headers():
     DEV_URL = "https://chat-dev.dartmouth.edu/api/"
     DEV_KEY = os.environ.get("DARTMOUTH_CHAT_DEV_API_KEY")
+    if DEV_KEY is None:
+        pytest.skip("No DARTMOUTH_CHAT_DEV_API_KEY available.")
     model = "anthropic.claude-3-7-sonnet-20250219"
     llm = ChatDartmouthCloud(
         model_name=model,
