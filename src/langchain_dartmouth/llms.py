@@ -16,6 +16,7 @@ from langchain_dartmouth.definitions import (
     MODEL_LISTING_BASE_URL,
 )
 from langchain_dartmouth.base import AuthenticatedMixin
+from langchain_dartmouth.utils import add_response_cost_to_usage_metadata
 from langchain_dartmouth.exceptions import InvalidKeyError, ModelNotFoundError
 from langchain_dartmouth.model_listing import (
     DartmouthModelListing,
@@ -458,6 +459,7 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
         self.dartmouth_api_key = dartmouth_api_key
         self.jwt_url = jwt_url
         self.authenticate(jwt_url=self.jwt_url)
+        self.include_response_headers = True
 
     @staticmethod
     def list(
@@ -727,6 +729,7 @@ class ChatDartmouthCloud(ChatOpenAI):
             http_client=DefaultHttpxClient(follow_redirects=False),
         )
         self.dartmouth_chat_api_key = dartmouth_chat_api_key
+        self.include_response_headers = True
 
     @staticmethod
     def list(
@@ -771,7 +774,8 @@ class ChatDartmouthCloud(ChatOpenAI):
         :rtype: BaseMessage
         """
         try:
-            return super().invoke(*args, **kwargs)
+            response = super().invoke(*args, **kwargs)
+            return add_response_cost_to_usage_metadata(response)
         except APIStatusError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
@@ -793,7 +797,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         """
         try:
             response = await super().ainvoke(*args, **kwargs)
-            return response
+            return add_response_cost_to_usage_metadata(response)
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
