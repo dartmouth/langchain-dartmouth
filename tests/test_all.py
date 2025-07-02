@@ -57,6 +57,16 @@ def test_chat_dartmouth():
     assert response.content
 
 
+def test_chat_dartmouth_headers():
+    llm = ChatDartmouth(model_name="llama-3-1-8b-instruct")
+    response = llm.invoke(
+        [
+            HumanMessage(content="What is your name?"),
+        ]
+    )
+    assert response.response_metadata["headers"]
+
+
 @pytest.mark.parametrize(
     "model",
     [model["name"] for model in ChatDartmouth.list()],
@@ -96,6 +106,19 @@ def test_chat_dartmouth_cloud_url():
     )
     response = llm.invoke("Are you there? Answer yes or no.")
     assert "yes" in response.content.lower()
+
+
+def test_chat_dartmouth_cloud_headers():
+    DEV_URL = "https://chat-dev.dartmouth.edu/api/"
+    DEV_KEY = os.environ.get("DARTMOUTH_CHAT_DEV_API_KEY")
+    model = "anthropic.claude-3-7-sonnet-20250219"
+    llm = ChatDartmouthCloud(
+        model_name=model,
+        inference_server_url=DEV_URL,
+        dartmouth_chat_api_key=DEV_KEY,
+    )
+    response = llm.invoke("Are you there? Answer yes or no.")
+    assert response.response_metadata["headers"]
 
 
 def test_dartmouth_llm_bad_name():
