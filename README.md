@@ -135,7 +135,7 @@ For a list of available models, check the respective `list()` method of each cla
 <tbody>
   <tr>
     <td style="padding:0px;border-width:0px;vertical-align:center">
-    Created by Simon Stone for Dartmouth College under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons CC BY-NC 4.0 License</a>.<br>For questions, comments, or improvements, email <a href="mailto:researchcomputing@dartmouth.edu">Research Computing</a>.
+    Created by Simon Stone for Dartmouth College under <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons CC BY-NC 4.0 License</a>.<br>For questions, comments, or improvements, email <a href="mailto:research.computing@dartmouth.edu">Research Computing</a>.
     </td>
     <td style="padding:0 0 0 1em;border-width:0px;vertical-align:center"><img alt="Creative Commons License" src="https://i.creativecommons.org/l/by/4.0/88x31.png"/></td>
   </tr>
