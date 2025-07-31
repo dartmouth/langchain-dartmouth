@@ -53,7 +53,7 @@ There are three kinds of Large Language Models (LLMs) provided by Dartmouth:
 
 Using a Dartmouth-hosted base language model:
 
-```{python}
+```python
 from langchain_dartmouth.llms import DartmouthLLM
 
 llm = DartmouthLLM(model_name="codellama-13b-hf")
@@ -64,7 +64,7 @@ print(response)
 
 Using a Dartmouth-hosted chat model:
 
-```{python}
+```python
 from langchain_dartmouth.llms import ChatDartmouth
 
 
@@ -79,20 +79,20 @@ print(response.content)
 
 Using a Dartmouth-provided third-party chat model:
 
-```{python}
+```python
 from langchain_dartmouth.llms import ChatDartmouthCloud
 
 
 llm = ChatDartmouthCloud(model_name="openai.gpt-4o-mini-2024-07-18")
 
 response = llm.invoke("Hi there!")
-
+```
 
 ### Embeddings model
 
 Using a Dartmouth-hosted embeddings model:
 
-```{python}
+```python
 from langchain_dartmouth.embeddings import DartmouthEmbeddings
 
 
@@ -107,7 +107,7 @@ print(response)
 
 Using a Dartmouth-hosted reranking model:
 
-```{python}
+```python
 from langchain_dartmouth.retrievers.document_compressors import DartmouthReranker
 from langchain.docstore.document import Document
 
@@ -128,6 +128,26 @@ print(ranked_docs)
 ## Available models
 
 For a list of available models, check the respective `list()` method of each class.
+
+
+## How to cite
+
+If you are using `langchain_dartmouth` as part of a scientific publication, we would greatly appreciate a citation of the following paper:
+
+```bibtex
+@inproceedings{10.1145/3708035.3736076,
+author = {Stone, Simon and Crossett, Jonathan and Luker, Tivon and Leligdon, Lora and Cowen, William and Darabos, Christian},
+title = {Dartmouth Chat - Deploying an Open-Source LLM Stack at Scale},
+year = {2025},
+isbn = {9798400713989},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+doi = {10.1145/3708035.3736076},
+booktitle = {Practice and Experience in Advanced Research Computing 2025: The Power of Collaboration},
+articleno = {43},
+numpages = {5}
+}
+```
 
 
 ## License
