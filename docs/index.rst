@@ -50,6 +50,27 @@ Feedback and Comments
 For questions, comments, or improvements, email `Research Computing <mailto:research.computing@dartmouth.edu>`_.
 
 
+
+How To Cite
+======================
+If you are using langchain_dartmouth as part of a scientific publication, we would greatly appreciate a citation of the following paper:
+
+.. code-block:: bibtex
+
+@inproceedings{10.1145/3708035.3736076,
+author = {Stone, Simon and Crossett, Jonathan and Luker, Tivon and Leligdon, Lora and Cowen, William and Darabos, Christian},
+title = {Dartmouth Chat - Deploying an Open-Source LLM Stack at Scale},
+year = {2025},
+isbn = {9798400713989},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+doi = {10.1145/3708035.3736076},
+booktitle = {Practice and Experience in Advanced Research Computing 2025: The Power of Collaboration},
+articleno = {43},
+numpages = {5}
+}
+
+
 License
 ==================
 Created by Simon Stone for Dartmouth College under `Creative Commons CC BY-NC 4.0 License <https://creativecommons.org/licenses/by/4.0/>`_
