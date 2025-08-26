@@ -661,9 +661,9 @@ class ChatDartmouthCloud(ChatOpenAI):
     @model_validator(mode="before")
     @classmethod
     def validate_temperature(cls, values: dict[str, Any]) -> Any:
-        """Currently o models only allow temperature=1."""
+        """Currently o and GPT 5 models only allow temperature=1."""
         model = values.get("model_name") or values.get("model") or ""
-        if model.startswith("openai.o"):
+        if model.startswith("openai.o") or model.startswith("openai.gpt-5"):
             if "temperature" in values:
                 warnings.warn(
                     f"{model} does not support setting the temperature. Forcing"
