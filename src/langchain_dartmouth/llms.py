@@ -1,3 +1,4 @@
+from email.mime import base
 from huggingface_hub import inference
 from langchain_core.callbacks import (
     AsyncCallbackManagerForLLMRun,
@@ -733,12 +734,16 @@ class ChatDartmouthCloud(ChatOpenAI):
 
     @staticmethod
     def list(
-        dartmouth_chat_api_key: str | None = None, url: str = CLOUD_BASE_URL
+        dartmouth_chat_api_key: str | None = None,
+        base_only: bool = True,
+        url: str = CLOUD_BASE_URL,
     ) -> list[dict]:
         """List the models available through ``ChatDartmouthCloud``.
 
         :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
         :type dartmouth_chat_api_key: str, optional
+        :param base_only: If True, only regular Large Language Models are returned. If False, Workspace models are also returned.
+        :type base_only: bool, optional
         :param url: URL of the listing server
         :type url: str, optional
         :return: A list of descriptions of the available models
@@ -752,7 +757,7 @@ class ChatDartmouthCloud(ChatOpenAI):
                 "Dartmouth Chat API key not provided as argument or defined as environment variable 'DARTMOUTH_CHAT_API_KEY'."
             ) from e
         listing = CloudModelListing(api_key=dartmouth_chat_api_key, url=url)
-        models = listing.list()
+        models = listing.list(base_only=base_only)
 
         # Filter out some models better accessed through other means
         def is_cloud_model(m):
