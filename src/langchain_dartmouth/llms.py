@@ -771,6 +771,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         # Some /models endpoints return the model list in a field:
         if "data" in models:
             models = models["data"]
+
         # Filter out some models better accessed through other means
         def is_cloud_model(m):
             return not (
