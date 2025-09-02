@@ -257,7 +257,7 @@ def test_tei_client():
 if __name__ == "__main__":
     # test_dartmouth_llm()
     # test_chat_dartmouth()
-    test_chat_dartmouth_cloud()
+    # test_chat_dartmouth_cloud()
     # test_dartmouth_chat()
     # test_dartmouth_embeddings()
     # test_dartmouth_reranker()
