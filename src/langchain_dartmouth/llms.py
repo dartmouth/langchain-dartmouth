@@ -610,8 +610,8 @@ class ChatDartmouthCloud(ChatOpenAI):
     :type top_logprobs: int, optional
     :param logit_bias: Modify the likelihood of specified tokens appearing in the completion.
     :type logit_bias: dict, optional
-    :param n: Number of chat completions to generate for each prompt, defaults to ``1``
-    :type n: int
+    :param n: Number of chat completions to generate for each prompt, defaults to None (i.e., use upstream default)
+    :type n: int, optional
     :param top_p: Total probability mass of tokens to consider at each step.
     :type top_p: float, optional
     :param model_kwargs: Holds any model parameters valid for ``create`` call not explicitly specified.
@@ -654,7 +654,7 @@ class ChatDartmouthCloud(ChatOpenAI):
     top_logprobs: Optional[int] = None
     logit_bias: Optional[Dict[int, int]] = None
     streaming: bool = False
-    n: int = 1
+    n: int | None = None
     top_p: Optional[float] = None
     model_kwargs: Optional[dict] = None
     model_name: str = Field(default="openai.gpt-4.1-mini-2025-04-14")
@@ -664,7 +664,12 @@ class ChatDartmouthCloud(ChatOpenAI):
     def validate_temperature(cls, values: dict[str, Any]) -> Any:
         """Currently o and GPT 5 models only allow temperature=1."""
         model = values.get("model_name") or values.get("model") or ""
-        if model.startswith("openai.o") or model.startswith("openai.gpt-5"):
+        if (
+            model.startswith("openai.o")
+            or model.startswith("openai.gpt-5")
+            or model.startswith("openai_responses.gpt-5")
+            or model.startswith("openai_responses.o")
+        ):
             if "temperature" in values:
                 warnings.warn(
                     f"{model} does not support setting the temperature. Forcing"
@@ -686,7 +691,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         seed: Optional[int] = None,
         top_logprobs: Optional[int] = None,
         logit_bias: Optional[Dict[int, int]] = None,
-        n: int = 1,
+        n: int | None = None,
         top_p: Optional[float] = None,
         model_kwargs: Optional[dict] = None,
         dartmouth_chat_api_key: Optional[str] = None,
@@ -723,12 +728,16 @@ class ChatDartmouthCloud(ChatOpenAI):
                 ) from e
 
         kwargs["openai_api_key"] = dartmouth_chat_api_key
+        # if "_responses" in model_name:
+        #     # Use the Responses API spec if necessary
+        #     kwargs["use_responses_api"] = True
         super().__init__(
             **kwargs,
             # Turn off following redirects, see issue #8
             http_async_client=DefaultAsyncHttpxClient(follow_redirects=False),
             http_client=DefaultHttpxClient(follow_redirects=False),
         )
+
         self.dartmouth_chat_api_key = dartmouth_chat_api_key
         self.include_response_headers = True
 
@@ -758,13 +767,15 @@ class ChatDartmouthCloud(ChatOpenAI):
             ) from e
         listing = CloudModelListing(api_key=dartmouth_chat_api_key, url=url)
         models = listing.list(base_only=base_only)
-
+        # Some /models endpoints return the model list in a field:
+        if "data" in models:
+            models = models["data"]
         # Filter out some models better accessed through other means
         def is_cloud_model(m):
             return not (
-                m["id"].startswith("meta.")
+                m["id"].startswith("meta")
                 or m["id"].startswith("ollama.")
-                or m["owned_by"] in ["ollama", "arena"]
+                or ("is_active" in m and m["is_active"] is False)
             )
 
         models = [reformat_model_spec(m) for m in models if is_cloud_model(m)]
