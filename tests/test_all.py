@@ -62,38 +62,33 @@ def test_chat_dartmouth_headers():
     assert response.response_metadata["headers"]
 
 
-# @pytest.mark.parametrize(
-#     "model",
-#     [model["name"] for model in ChatDartmouth.list()],
-# )
-# def test_chat_dartmouth_list(model):
-#     llm = ChatDartmouth(model_name=model)
-#     response = llm.invoke("Are you there? Say yes or no")
-#     assert "yes" in response.content.lower(), f"Model {model} did not respond."
+def test_chat_dartmouth_list():
+    llms = ChatDartmouth.list()
+    assert len(llms) > 0
 
 
-# @pytest.mark.parametrize(
-#     "model_name, expected",
-#     [
-#         ("default", "openai"),
-#     ]
-#     + [(model["name"], model["provider"]) for model in ChatDartmouthCloud.list()],
-# )
-# def test_chat_dartmouth_cloud(model_name, expected):
+@pytest.mark.parametrize(
+    "model_name",
+    [
+        "default",
+    ]
+    + [model["name"] for model in ChatDartmouthCloud.list()],
+)
+def test_chat_dartmouth_cloud(model_name):
 
-#     kwargs = dict()
-#     if model_name == "default":
-#         llm = ChatDartmouthCloud()
-#     else:
-#         if "gemini-2.5" in model_name.lower():
-#             # Gemini reasoning models with default settings often need too many tokens for reasoning to produce output
-#             llm = ChatDartmouthCloud(model_name=model_name, max_tokens=1024)
-#             kwargs = {"reasoning_effort": "low"}
-#         else:
-#             llm = ChatDartmouthCloud(model_name=model_name)
+    kwargs = dict()
+    if model_name == "default":
+        llm = ChatDartmouthCloud()
+    else:
+        if "gemini-2.5" in model_name.lower():
+            # Gemini reasoning models with default settings often need too many tokens for reasoning to produce output
+            llm = ChatDartmouthCloud(model_name=model_name, max_tokens=1024)
+            kwargs = {"reasoning_effort": "low"}
+        else:
+            llm = ChatDartmouthCloud(model_name=model_name)
 
-#     response = llm.invoke("Who are you? Who made you?", **kwargs)
-#     assert expected.split("_")[0] in response.content.lower()
+    response = llm.invoke("Ping", **kwargs)
+    assert len(response.content) > 0
 
 
 def test_chat_dartmouth_cloud_url():

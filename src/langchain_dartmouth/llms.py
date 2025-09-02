@@ -669,6 +669,7 @@ class ChatDartmouthCloud(ChatOpenAI):
             or model.startswith("openai.gpt-5")
             or model.startswith("openai_responses.gpt-5")
             or model.startswith("openai_responses.o")
+            or ".o4" in model
         ):
             if "temperature" in values:
                 warnings.warn(
