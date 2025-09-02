@@ -767,13 +767,15 @@ class ChatDartmouthCloud(ChatOpenAI):
             ) from e
         listing = CloudModelListing(api_key=dartmouth_chat_api_key, url=url)
         models = listing.list(base_only=base_only)
-
+        # Some /models endpoints return the model list in a field:
+        if "data" in models:
+            models = models["data"]
         # Filter out some models better accessed through other means
         def is_cloud_model(m):
             return not (
-                m["id"].startswith("meta.")
+                m["id"].startswith("meta")
                 or m["id"].startswith("ollama.")
-                or m["owned_by"] in ["ollama", "arena"]
+                or ("is_active" in m and m["is_active"] is False)
             )
 
         models = [reformat_model_spec(m) for m in models if is_cloud_model(m)]

@@ -76,9 +76,11 @@ class CloudModelListing(BaseModelListing):
         :return: List of model descriptions
         :rtype: List[dict]
         """
-        resp = self.SESSION.get(url=self.url + f"models{'/base' if base_only else ''}")
+        resp = self.SESSION.get(
+            url=self.url + f"v1/models{'/base' if base_only else ''}"
+        )
         resp.raise_for_status()
-        return resp.json()["data"]
+        return resp.json()
 
 
 def reformat_model_spec(model_spec: dict) -> dict:
@@ -94,18 +96,16 @@ def reformat_model_spec(model_spec: dict) -> dict:
     new_spec["provider"] = model_spec["id"].split(sep=".", maxsplit=1)[0]
     new_spec["type"] = "llm"
 
-    def get_capablities(caps: dict) -> List[str]:
-        capabilities = ["chat"]  # All models have chat capability
-        if caps["vision"]:
-            capabilities.append("vision")
-        return capabilities
+    def get_capablities(caps: List[dict[str, str]]) -> List[str]:
+        capabilities = set(["chat"])  # All models have chat capability
+        for cap in caps:
+            capabilities.add(cap["name"].lower())
+        return list(capabilities)
 
     try:
-        new_spec["capabilities"] = get_capablities(
-            model_spec["info"]["meta"]["capabilities"]
-        )
+        new_spec["capabilities"] = get_capablities(model_spec["meta"]["tags"])
     except KeyError:
-        # Some /models endpoints don't provide the "info" key
+        # Some /models endpoints don't provide the "meta" key
         pass
 
     new_spec["server"] = "dartmouth-chat"

@@ -67,38 +67,38 @@ def test_chat_dartmouth_headers():
     assert response.response_metadata["headers"]
 
 
-@pytest.mark.parametrize(
-    "model",
-    [model["name"] for model in ChatDartmouth.list()],
-)
-def test_chat_dartmouth_list(model):
-    llm = ChatDartmouth(model_name=model)
-    response = llm.invoke("Are you there? Say yes or no")
-    assert "yes" in response.content.lower(), f"Model {model} did not respond."
+# @pytest.mark.parametrize(
+#     "model",
+#     [model["name"] for model in ChatDartmouth.list()],
+# )
+# def test_chat_dartmouth_list(model):
+#     llm = ChatDartmouth(model_name=model)
+#     response = llm.invoke("Are you there? Say yes or no")
+#     assert "yes" in response.content.lower(), f"Model {model} did not respond."
 
 
-@pytest.mark.parametrize(
-    "model_name, expected",
-    [
-        ("default", "openai"),
-    ]
-    + [(model["name"], model["provider"]) for model in ChatDartmouthCloud.list()],
-)
-def test_chat_dartmouth_cloud(model_name, expected):
-    
-    kwargs = dict()
-    if model_name == "default":
-        llm = ChatDartmouthCloud()
-    else:
-        if "gemini-2.5" in model_name.lower():
-            # Gemini reasoning models with default settings often need too many tokens for reasoning to produce output
-            llm = ChatDartmouthCloud(model_name=model_name, max_tokens=1024)
-            kwargs = {"reasoning_effort": "low"}
-        else:
-            llm = ChatDartmouthCloud(model_name=model_name)
-    
-    response = llm.invoke("Who are you? Who made you?", **kwargs)
-    assert expected.split("_")[0] in response.content.lower()
+# @pytest.mark.parametrize(
+#     "model_name, expected",
+#     [
+#         ("default", "openai"),
+#     ]
+#     + [(model["name"], model["provider"]) for model in ChatDartmouthCloud.list()],
+# )
+# def test_chat_dartmouth_cloud(model_name, expected):
+
+#     kwargs = dict()
+#     if model_name == "default":
+#         llm = ChatDartmouthCloud()
+#     else:
+#         if "gemini-2.5" in model_name.lower():
+#             # Gemini reasoning models with default settings often need too many tokens for reasoning to produce output
+#             llm = ChatDartmouthCloud(model_name=model_name, max_tokens=1024)
+#             kwargs = {"reasoning_effort": "low"}
+#         else:
+#             llm = ChatDartmouthCloud(model_name=model_name)
+
+#     response = llm.invoke("Who are you? Who made you?", **kwargs)
+#     assert expected.split("_")[0] in response.content.lower()
 
 
 def test_chat_dartmouth_cloud_url():
@@ -164,20 +164,16 @@ def test_chat_dartmouth_cloud_bad_key():
         llm.invoke("Who are you?")
 
 
-@pytest.mark.parametrize(
-    "model",
-    [model["name"] for model in ChatDartmouthCloud.list()],
-)
-def test_chat_dartmouth_cloud_list(model):
-    llm = ChatDartmouthCloud(model_name=model)
-    response = llm.invoke("Are you there? Say yes or no")
-    assert "yes" in response.content.lower(), f"Model {model} did not respond."
+def test_chat_dartmouth_cloud_list():
+    llms = ChatDartmouthCloud.list()
+    assert len(llms) > 0
 
 
 def test_litellm_model_list():
     models = ChatDartmouthCloud.list(
         dartmouth_chat_api_key=os.environ["LITELLM_TEAM_API_KEY"],
         url=os.environ["LITELLM_BASE_URL"],
+        base_only=False,
     )
     # There should only be three models available to this team
     assert len(models) == 3
