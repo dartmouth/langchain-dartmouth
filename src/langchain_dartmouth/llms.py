@@ -455,6 +455,7 @@ class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
         # For compliance, a non-null API key must be set
         kwargs["openai_api_key"] = "unused"
         kwargs["default_headers"] = {"User-Agent": USER_AGENT}
+        kwargs["model_name"] = model_name
         super().__init__(**kwargs)
         self.authenticator = authenticator
         self.dartmouth_api_key = dartmouth_api_key

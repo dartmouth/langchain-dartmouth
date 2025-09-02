@@ -89,7 +89,7 @@ def test_chat_dartmouth_cloud(model_name):
 
     response = llm.invoke("Ping", **kwargs)
     assert len(response.content) > 0
-    
+
 
 def test_chat_dartmouth_cloud_url():
     DEV_URL = "https://chat-dev.dartmouth.edu/api/"
