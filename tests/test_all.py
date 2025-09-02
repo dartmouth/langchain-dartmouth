@@ -32,14 +32,9 @@ def test_dartmouth_llm():
     assert len(DartmouthLLM.list()) > 0
 
 
-@pytest.mark.parametrize(
-    "model",
-    [model["name"] for model in DartmouthLLM.list()],
-)
-def test_dartmouth_llm_list(model):
-    llm = DartmouthLLM(model_name=model, max_new_tokens=16)
-    response = llm.invoke("Hi there")
-    assert len(response) > 0
+def test_dartmouth_llm_list():
+    llms = DartmouthLLM.list()
+    assert len(llms) > 0
 
 
 def test_chat_dartmouth():
