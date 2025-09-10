@@ -633,7 +633,7 @@ class ChatDartmouthCloud(ChatOpenAI):
 
         from langchain_dartmouth.llms import ChatDartmouthCloud
 
-        llm = ChatDartmouthCloud(model_name="openai.gpt-4o-mini-2024-07-18")
+        llm = ChatDartmouthCloud(model_name="openai.gpt-4.1-mini-2025-04-14")
 
         response = llm.invoke("Hi there!")
 
