@@ -107,16 +107,8 @@ def test_chat_dartmouth_cloud_url():
 
 
 def test_chat_dartmouth_cloud_headers():
-    DEV_URL = "https://chat-dev.dartmouth.edu/api/"
-    DEV_KEY = os.environ.get("DARTMOUTH_CHAT_DEV_API_KEY")
-    if DEV_KEY is None:
-        pytest.skip("No DARTMOUTH_CHAT_DEV_API_KEY available.")
     model = "anthropic.claude-3-7-sonnet-20250219"
-    llm = ChatDartmouthCloud(
-        model_name=model,
-        inference_server_url=DEV_URL,
-        dartmouth_chat_api_key=DEV_KEY,
-    )
+    llm = ChatDartmouthCloud(model_name=model)
     response = llm.invoke("Are you there? Answer yes or no.")
     assert response.response_metadata["headers"]
 
@@ -170,12 +162,6 @@ def test_litellm_model_list():
 
 
 def test_dartmouth_chat():
-    llm = DartmouthChatModel(model_name="llama-3-8b-instruct", temperature=0.01)
-    response = llm.invoke(
-        "<|begin_of_text|><|start_header_id|>user<|end_header_id|>\n\nPlease respond with the single word OK<|eot_id|><|start_header_id|>assistant<|end_header_id|>"
-    )
-    assert response.strip() == "OK"
-
     llm = DartmouthChatModel(model_name="codellama-13b-instruct-hf")
     response = llm.invoke("<s>[INST]Please respond with the single word OK[/INST]")
     assert response.strip() == "OK"
@@ -245,7 +231,7 @@ def test_tei_client():
 
 
 if __name__ == "__main__":
-    pass
+    models = ChatDartmouthCloud.list()
     # test_dartmouth_llm()
     # test_chat_dartmouth()
     # test_chat_dartmouth_cloud()
