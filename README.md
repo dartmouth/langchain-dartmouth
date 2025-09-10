@@ -49,7 +49,7 @@ There are three kinds of Large Language Models (LLMs) provided by Dartmouth:
   - Base models without instruction tuning (require no special prompt format)
   - Instruction-tuned models (also known as Chat models) requiring [specific prompt formats](https://llama.meta.com/docs/model-cards-and-prompt-formats/meta-llama-3/)
 - Cloud:
-  - Third-party, pay-as-you-go chat models (e.g., OpenAI's GPT 4o, Google Gemini)
+  - Third-party, pay-as-you-go chat models (e.g., OpenAI's GPT 4.1, Google Gemini)
 
 Using a Dartmouth-hosted base language model:
 
@@ -83,7 +83,7 @@ Using a Dartmouth-provided third-party chat model:
 from langchain_dartmouth.llms import ChatDartmouthCloud
 
 
-llm = ChatDartmouthCloud(model_name="openai.gpt-4o-mini-2024-07-18")
+llm = ChatDartmouthCloud(model_name="openai.gpt-4.1-mini-2025-04-14")
 
 response = llm.invoke("Hi there!")
 ```
@@ -136,16 +136,16 @@ If you are using `langchain_dartmouth` as part of a scientific publication, we w
 
 ```bibtex
 @inproceedings{10.1145/3708035.3736076,
-author = {Stone, Simon and Crossett, Jonathan and Luker, Tivon and Leligdon, Lora and Cowen, William and Darabos, Christian},
-title = {Dartmouth Chat - Deploying an Open-Source LLM Stack at Scale},
-year = {2025},
-isbn = {9798400713989},
-publisher = {Association for Computing Machinery},
-address = {New York, NY, USA},
-doi = {10.1145/3708035.3736076},
-booktitle = {Practice and Experience in Advanced Research Computing 2025: The Power of Collaboration},
-articleno = {43},
-numpages = {5}
+  author = {Stone, Simon and Crossett, Jonathan and Luker, Tivon and Leligdon, Lora and Cowen, William and Darabos, Christian},
+  title = {Dartmouth Chat - Deploying an Open-Source LLM Stack at Scale},
+  year = {2025},
+  isbn = {9798400713989},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  doi = {10.1145/3708035.3736076},
+  booktitle = {Practice and Experience in Advanced Research Computing 2025: The Power of Collaboration},
+  articleno = {43},
+  numpages = {5}
 }
 ```
 
