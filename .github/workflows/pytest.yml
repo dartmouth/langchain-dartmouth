@@ -42,3 +42,4 @@ jobs:
         DARTMOUTH_CHAT_API_KEY: ${{ secrets.DARTMOUTH_CHAT_API_KEY }}
         LITELLM_TEAM_API_KEY: ${{ secrets.LITELLM_TEAM_API_KEY }}
         LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+        STATIC_TEST_MODEL_ID: ${{ env.STATIC_TEST_MODEL_ID }}
