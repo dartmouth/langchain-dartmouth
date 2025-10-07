@@ -17,7 +17,10 @@ from langchain_dartmouth.definitions import (
     MODEL_LISTING_BASE_URL,
 )
 from langchain_dartmouth.base import AuthenticatedMixin
-from langchain_dartmouth.utils import add_response_cost_to_usage_metadata
+from langchain_dartmouth.utils import (
+    add_response_cost_to_usage_metadata,
+    filter_dartmouth_chat_models,
+)
 from langchain_dartmouth.exceptions import InvalidKeyError, ModelNotFoundError
 from langchain_dartmouth.model_listing import (
     DartmouthModelListing,
@@ -773,16 +776,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         if "data" in models:
             models = models["data"]
 
-        # Filter out some models better accessed through other means
-        def is_cloud_model(m):
-            return not (
-                m["id"].startswith("meta")
-                or m["id"].startswith("ollama.")
-                or ("is_active" in m and m["is_active"] is False)
-            )
-
-        models = [reformat_model_spec(m) for m in models if is_cloud_model(m)]
-        return models
+        return filter_dartmouth_chat_models(models, exclude_tag="embedding")
 
     def invoke(self, *args, **kwargs) -> BaseMessage:
         """Invokes the model to get a response to a query.
