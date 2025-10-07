@@ -16,8 +16,6 @@ from langchain_dartmouth.retrievers.document_compressors import (
     DartmouthReranker,
 )
 
-from langchain_dartmouth.utils import filter_dartmouth_chat_models
-
 from langchain.docstore.document import Document
 from langchain.schema import SystemMessage, HumanMessage
 
