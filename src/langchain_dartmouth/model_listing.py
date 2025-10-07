@@ -1,16 +1,12 @@
 """Helper class to interact with the model listing API"""
 
-from langchain_dartmouth.definitions import (
-    MODEL_LISTING_BASE_URL,
-    CLOUD_BASE_URL,
-    USER_AGENT,
-)
+from langchain_dartmouth.definitions import USER_AGENT
 
 
 import requests
 from dartmouth_auth import get_jwt
 
-from typing import Literal, List
+from typing import List
 
 
 class BaseModelListing:
@@ -81,43 +77,3 @@ class CloudModelListing(BaseModelListing):
         )
         resp.raise_for_status()
         return resp.json()
-
-
-def reformat_model_spec(model_spec: dict) -> dict:
-    """Reformats the model specification returned by Open WebUI to align with our on-premise spec format.
-
-    :param model_spec: Model spec returned from Open WebUI
-    :type model_spec: dict
-    :return: Model spec using the schema of Dartmouth's listing API.
-    :rtype: dict
-    """
-    new_spec = dict()
-    new_spec["name"] = model_spec["id"]
-    new_spec["provider"] = model_spec["id"].split(sep=".", maxsplit=1)[0]
-    new_spec["type"] = "llm"
-
-    def get_capablities(caps: List[dict[str, str]]) -> List[str]:
-        capabilities = set(["chat"])  # All models have chat capability
-        for cap in caps:
-            capabilities.add(cap["name"].lower())
-        return list(capabilities)
-
-    try:
-        new_spec["capabilities"] = get_capablities(model_spec["meta"]["tags"])
-    except KeyError:
-        # Some /models endpoints don't provide the "meta" key
-        pass
-
-    new_spec["server"] = "dartmouth-chat"
-    new_spec["parameters"] = dict()
-    return new_spec
-
-
-if __name__ == "__main__":
-    import os
-
-    listing = DartmouthModelListing(os.environ["DARTMOUTH_API_KEY"])
-    print(listing.list(server="text-generation-inference", capabilities=["chat"]))
-
-    listing = CloudModelListing(os.environ["DARTMOUTH_CHAT_API_KEY"])
-    print(listing.list())

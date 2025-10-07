@@ -6,7 +6,6 @@ from langchain_dartmouth.llms import (
     DartmouthLLM,
     ChatDartmouth,
     DartmouthChatModel,
-    ChatDartmouthCloud,
 )
 from langchain_dartmouth.embeddings import DartmouthEmbeddings
 from langchain_dartmouth.exceptions import InvalidKeyError, ModelNotFoundError
@@ -17,7 +16,7 @@ from langchain_dartmouth.retrievers.document_compressors import (
 )
 
 from langchain.docstore.document import Document
-from langchain.schema import SystemMessage, HumanMessage
+from langchain.schema import HumanMessage
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -37,23 +36,8 @@ def test_dartmouth_llm_list():
     assert len(llms) > 0
 
 
-def test_chat_dartmouth():
-    llm = ChatDartmouth(model_name="llama-3-8b-instruct")
-    response = llm.invoke("Please respond with the single word OK")
-    assert response.content.strip() == "OK"
-
-    llm = ChatDartmouth(model_name="llama-3-1-8b-instruct")
-    response = llm.invoke(
-        [
-            SystemMessage(content="You are a cat."),
-            HumanMessage(content="What is your name?"),
-        ]
-    )
-    assert response.content
-
-
 def test_chat_dartmouth_headers():
-    llm = ChatDartmouth(model_name="llama-3-1-8b-instruct")
+    llm = ChatDartmouth()
     response = llm.invoke(
         [
             HumanMessage(content="What is your name?"),
@@ -72,45 +56,39 @@ def test_chat_dartmouth_list():
     [
         "default",
     ]
-    + [model["id"] for model in ChatDartmouthCloud.list()],
+    + [model["id"] for model in ChatDartmouth.list()],
 )
-def test_chat_dartmouth_cloud(model_name):
+def test_chat_dartmouth(model_name):
 
     kwargs = dict()
     if model_name == "default":
-        llm = ChatDartmouthCloud()
+        llm = ChatDartmouth()
     else:
         if "gemini-2.5" in model_name.lower():
-            # Gemini reasoning models with default settings often need too many tokens for reasoning to produce output
-            llm = ChatDartmouthCloud(model_name=model_name, max_tokens=1024)
+            # Gemini reasoning models with default settings often need
+            # too many tokens for reasoning to produce output
+            llm = ChatDartmouth(model_name=model_name, max_tokens=1024)
             kwargs = {"reasoning_effort": "low"}
         else:
-            llm = ChatDartmouthCloud(model_name=model_name)
+            llm = ChatDartmouth(model_name=model_name)
 
     response = llm.invoke("Ping", **kwargs)
     assert len(response.content) > 0
 
 
-def test_chat_dartmouth_cloud_url():
+def test_chat_dartmouth_url():
     DEV_URL = "https://chat-dev.dartmouth.edu/api/"
     DEV_KEY = os.environ.get("DARTMOUTH_CHAT_DEV_API_KEY")
     if DEV_KEY is None:
         pytest.skip("No DARTMOUTH_CHAT_DEV_API_KEY available.")
     model = os.environ["STATIC_TEST_MODEL_ID"]
-    llm = ChatDartmouthCloud(
+    llm = ChatDartmouth(
         model_name=model,
         inference_server_url=DEV_URL,
         dartmouth_chat_api_key=DEV_KEY,
     )
     response = llm.invoke("Are you there? Answer yes or no.")
     assert "yes" in response.content.lower()
-
-
-def test_chat_dartmouth_cloud_headers():
-    model = os.environ["STATIC_TEST_MODEL_ID"]
-    llm = ChatDartmouthCloud(model_name=model)
-    response = llm.invoke("Are you there? Answer yes or no.")
-    assert response.response_metadata["headers"]
 
 
 def test_dartmouth_llm_bad_name():
@@ -128,27 +106,9 @@ def test_chat_dartmouth_bad_name():
 
 
 def test_chat_dartmouth_bad_key():
+    llm = ChatDartmouth(dartmouth_chat_api_key="Bad")
     with pytest.raises(InvalidKeyError):
-        ChatDartmouth(dartmouth_api_key="Bad")
-
-
-def test_chat_dartmouth_cloud_bad_name():
-    llm = ChatDartmouthCloud(model_name="Bad name")
-
-    with pytest.raises(ModelNotFoundError):
-        llm.invoke("Who are you?")
-
-
-def test_chat_dartmouth_cloud_bad_key():
-    llm = ChatDartmouthCloud(dartmouth_chat_api_key="Bad")
-
-    with pytest.raises(InvalidKeyError):
-        llm.invoke("Who are you?")
-
-
-def test_chat_dartmouth_cloud_list():
-    llms = ChatDartmouthCloud.list()
-    assert len(llms) > 0
+        llm.invoke("Won't work!")
 
 
 def test_litellm_model_list():
@@ -158,7 +118,7 @@ def test_litellm_model_list():
     LITELLM_TEAM_API_KEY = os.environ.get("LITELLM_TEAM_API_KEY")
     if LITELLM_TEAM_API_KEY is None:
         pytest.skip("No LITELLM_TEAM_API_KEY available.")
-    models = ChatDartmouthCloud.list(
+    models = ChatDartmouth.list(
         dartmouth_chat_api_key=LITELLM_TEAM_API_KEY,
         url=LITELLM_BASE_URL,
         base_only=False,
@@ -181,7 +141,7 @@ def test_dartmouth_chat():
 
 def test_streaming():
     chunks = []
-    for chunk in ChatDartmouthCloud(seed=42).stream("Hi there!"):
+    for chunk in ChatDartmouth(seed=42).stream("Hi there!"):
         chunks.append(chunk)
     assert len(chunks) > 0
 
@@ -242,7 +202,7 @@ def test_tei_client():
 
 
 if __name__ == "__main__":
-    models = ChatDartmouthCloud.list()
+    models = ChatDartmouth.list()
     # test_dartmouth_llm()
     # test_chat_dartmouth()
     # test_chat_dartmouth_cloud()
