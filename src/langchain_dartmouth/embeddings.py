@@ -16,19 +16,14 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
     :type model_name: str, optional
     :param model_kwargs: Keyword arguments to pass to the model.
     :type model_kwargs: dict, optional
-    :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
-    :type dartmouth_api_key: str, optional
-    :param authenticator: A Callable returning a JSON Web Token (JWT) for authentication. Only needed for special use cases.
-    :type authenticator: Callable, optional
-    :param jwt_url: URL of the Dartmouth API endpoint returning a JSON Web Token (JWT).
-    :type jwt_url: str, optional
-    :param embeddings_server_url: URL pointing to an embeddings endpoint, defaults to ``"https://ai-api.dartmouth.edu/tei/"``.
+    :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
+    :param embeddings_server_url: URL pointing to an embeddings endpoint, defaults to ``"https://chat.dartmouth.edu/api/"``.
     :type embeddings_server_url: str, optional
 
     Example
     -----------
 
-    With an environment variable named ``DARTMOUTH_API_KEY`` pointing to your key obtained from `https://developer.dartmouth.edu <https://developer.dartmouth.edu>`_, using a Dartmouth-hosted embedding model only takes a few lines of code:
+    With an environment variable named ``DARTMOUTH_CHAT_API_KEY`` pointing to your key obtained from `Dartmouth Chat <https://chat.dartmouth.edu>`_, using anembedding model only takes a few lines of code:
 
     .. code-block:: python
 
@@ -83,15 +78,12 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
     @staticmethod
     def list(
         dartmouth_chat_api_key: str | None = None,
-        base_only: bool = True,
         url: str = CLOUD_BASE_URL,
     ) -> list[dict]:
         """List the models available through ``DartmouthEmbeddings``.
 
         :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
         :type dartmouth_chat_api_key: str, optional
-        :param base_only: If True, only regular Large Language Models are returned. If False, Workspace models are also returned.
-        :type base_only: bool, optional
         :param url: URL of the listing server
         :type url: str, optional
         :return: A list of descriptions of the available models
@@ -105,7 +97,8 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
                 "Dartmouth Chat API key not provided as argument or defined as environment variable 'DARTMOUTH_CHAT_API_KEY'."
             ) from e
         listing = CloudModelListing(api_key=dartmouth_chat_api_key, url=url)
-        models = listing.list(base_only=base_only)
+        # Embedding models can't be workspace models, so hardcode to base-only
+        models = listing.list(base_only=True)
         # Some /models endpoints return the model list in a field:
         if "data" in models:
             models = models["data"]
