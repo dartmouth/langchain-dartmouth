@@ -16,6 +16,8 @@ from langchain_dartmouth.retrievers.document_compressors import (
     DartmouthReranker,
 )
 
+from langchain_dartmouth.utils import filter_dartmouth_chat_models
+
 from langchain.docstore.document import Document
 from langchain.schema import SystemMessage, HumanMessage
 
@@ -72,7 +74,7 @@ def test_chat_dartmouth_list():
     [
         "default",
     ]
-    + [model["name"] for model in ChatDartmouthCloud.list()],
+    + [model["id"] for model in ChatDartmouthCloud.list()],
 )
 def test_chat_dartmouth_cloud(model_name):
 
@@ -96,7 +98,7 @@ def test_chat_dartmouth_cloud_url():
     DEV_KEY = os.environ.get("DARTMOUTH_CHAT_DEV_API_KEY")
     if DEV_KEY is None:
         pytest.skip("No DARTMOUTH_CHAT_DEV_API_KEY available.")
-    model = "anthropic.claude-3-7-sonnet-20250219"
+    model = os.environ["STATIC_TEST_MODEL_ID"]
     llm = ChatDartmouthCloud(
         model_name=model,
         inference_server_url=DEV_URL,
@@ -107,7 +109,7 @@ def test_chat_dartmouth_cloud_url():
 
 
 def test_chat_dartmouth_cloud_headers():
-    model = "anthropic.claude-3-7-sonnet-20250219"
+    model = os.environ["STATIC_TEST_MODEL_ID"]
     llm = ChatDartmouthCloud(model_name=model)
     response = llm.invoke("Are you there? Answer yes or no.")
     assert response.response_metadata["headers"]
@@ -152,9 +154,15 @@ def test_chat_dartmouth_cloud_list():
 
 
 def test_litellm_model_list():
+    LITELLM_BASE_URL = os.environ.get(
+        "LITELLM_BASE_URL", "https://llm-proxy.dartmouth.edu/"
+    )
+    LITELLM_TEAM_API_KEY = os.environ.get("LITELLM_TEAM_API_KEY")
+    if LITELLM_TEAM_API_KEY is None:
+        pytest.skip("No LITELLM_TEAM_API_KEY available.")
     models = ChatDartmouthCloud.list(
-        dartmouth_chat_api_key=os.environ["LITELLM_TEAM_API_KEY"],
-        url=os.environ["LITELLM_BASE_URL"],
+        dartmouth_chat_api_key=LITELLM_TEAM_API_KEY,
+        url=LITELLM_BASE_URL,
         base_only=False,
     )
     # There should only be three models available to this team
@@ -169,7 +177,8 @@ def test_dartmouth_chat():
     llm = DartmouthChatModel(
         inference_server_url="https://ai-api.dartmouth.edu/tgi/codellama-13b-instruct-hf/",
     )
-    print(llm.invoke("<s>[INST]Hello[/INST]"))
+    response = llm.invoke("<s>[INST]Hello[/INST]")
+    assert response
 
 
 def test_streaming():
@@ -179,8 +188,12 @@ def test_streaming():
     assert len(chunks) > 0
 
 
-def test_dartmouth_embeddings():
-    embeddings = DartmouthEmbeddings()
+@pytest.mark.parametrize(
+    "model_name",
+    [model["name"] for model in DartmouthEmbeddings.list()],
+)
+def test_dartmouth_embeddings(model_name):
+    embeddings = DartmouthEmbeddings(model_name=model_name)
     result = embeddings.embed_query("Is there anybody out there?")
     assert result
 
