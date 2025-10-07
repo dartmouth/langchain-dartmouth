@@ -329,7 +329,7 @@ class ChatDartmouth(ChatOpenAI):
 
     Both free on-prem models, as well as paid third-party models are available.
 
-    To see which models are available, which features they support, and how much they cost, run `ChatDartmouthCloud.list()`.
+    To see which models are available, which features they support, and how much they cost, run `ChatDartmouth.list()`.
 
 
     :param model_name: Name of the model to use, defaults to ``"openai.gpt-oss-120b"``.
@@ -491,7 +491,7 @@ class ChatDartmouth(ChatOpenAI):
         base_only: bool = True,
         url: str = CLOUD_BASE_URL,
     ) -> list[dict]:
-        """List the models available through ``ChatDartmouthCloud``.
+        """List the models available through ``ChatDartmouth``.
 
         :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
         :type dartmouth_chat_api_key: str, optional
@@ -531,7 +531,7 @@ class ChatDartmouth(ChatOpenAI):
         except APIStatusError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             elif e.status_code == 401:  # Unauthorized
@@ -553,7 +553,7 @@ class ChatDartmouth(ChatOpenAI):
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             else:
@@ -566,7 +566,7 @@ class ChatDartmouth(ChatOpenAI):
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             else:
@@ -579,7 +579,7 @@ class ChatDartmouth(ChatOpenAI):
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             else:
@@ -591,7 +591,7 @@ class ChatDartmouth(ChatOpenAI):
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             else:
@@ -604,7 +604,7 @@ class ChatDartmouth(ChatOpenAI):
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             else:
@@ -614,4 +614,3 @@ class ChatDartmouth(ChatOpenAI):
 if __name__ == "__main__":
     print(DartmouthLLM.list())
     print(ChatDartmouth.list())
-    print(ChatDartmouthCloud.list())
