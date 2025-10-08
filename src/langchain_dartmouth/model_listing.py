@@ -32,7 +32,12 @@ class ModelInfo(BaseModel):
     cost: Literal["undefined", "free", "$", "$$", "$$$", "$$$$"] | None = None
     """The relative cost of the model (more '$' signs means more expensive)."""
 
-    _relevant_capabilities: ClassVar[list[str]] = ["vision", "usage"]
+    _relevant_capabilities: ClassVar[list[str]] = [
+        "vision",  # Model can process images
+        "usage",  # Model reports token usage in response_metadata
+        "reasoning",  # Model supports reasoning_effort
+        "hybrid reasoning",  # Model supports reasoning_effort as an optional variable
+    ]
 
     @model_validator(mode="before")
     @classmethod
@@ -45,7 +50,9 @@ class ModelInfo(BaseModel):
             else:
                 return data
             data["description"] = meta.get("description")
-            data["capabilities"] = meta.get("capabilities", {})
+            data["capabilities"] = meta.get("capabilities", {}) | {
+                "tags": meta.get("tags", [])
+            }
 
             # Pass all tags, will be validated in field validators
             data["is_local"] = meta.get("tags", [])
@@ -71,12 +78,17 @@ class ModelInfo(BaseModel):
     @field_validator("capabilities", mode="before")
     @classmethod
     def get_capabilities(cls, v: Any, info: ValidationInfo):
-        capabilities = v or dict()
-        return [
+        capabilities = [
             c.lower()
-            for c, enabled in capabilities.items()
+            for c, enabled in v.items()
             if enabled and c.lower() in cls._relevant_capabilities
+        ] + [
+            c["name"].lower()
+            for c in v.get("tags", [])
+            if c["name"].lower() in cls._relevant_capabilities
         ]
+
+        return capabilities
 
     @field_validator("cost", mode="before")
     @classmethod
@@ -160,7 +172,11 @@ class CloudModelListing(BaseModelListing):
         cloud_models = resp.json()
         if "data" in cloud_models:
             cloud_models = cloud_models["data"]
-        return [ModelInfo.model_validate(m) for m in cloud_models]
+        return [
+            ModelInfo.model_validate(m)
+            for m in cloud_models
+            if m.get("is_active", True)
+        ]
 
 
 if __name__ == "__main__":
