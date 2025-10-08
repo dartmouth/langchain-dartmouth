@@ -56,7 +56,7 @@ def test_chat_dartmouth_list():
     [
         "default",
     ]
-    + [model["id"] for model in ChatDartmouth.list()],
+    + [model.id for model in ChatDartmouth.list()],
 )
 def test_chat_dartmouth(model_name):
 
@@ -148,7 +148,7 @@ def test_streaming():
 
 @pytest.mark.parametrize(
     "model_name",
-    [model["name"] for model in DartmouthEmbeddings.list()],
+    [model.id for model in DartmouthEmbeddings.list()],
 )
 def test_dartmouth_embeddings(model_name):
     embeddings = DartmouthEmbeddings(model_name=model_name)

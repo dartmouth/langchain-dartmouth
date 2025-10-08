@@ -17,12 +17,12 @@ from langchain_dartmouth.definitions import (
 from langchain_dartmouth.base import AuthenticatedMixin
 from langchain_dartmouth.utils import (
     add_response_cost_to_usage_metadata,
-    filter_dartmouth_chat_models,
 )
 from langchain_dartmouth.exceptions import InvalidKeyError, ModelNotFoundError
 from langchain_dartmouth.model_listing import (
     DartmouthModelListing,
     CloudModelListing,
+    ModelInfo,
 )
 
 from openai import (
@@ -490,7 +490,7 @@ class ChatDartmouth(ChatOpenAI):
         dartmouth_chat_api_key: str | None = None,
         base_only: bool = True,
         url: str = CLOUD_BASE_URL,
-    ) -> list[dict]:
+    ) -> list[ModelInfo]:
         """List the models available through ``ChatDartmouth``.
 
         :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
@@ -500,7 +500,7 @@ class ChatDartmouth(ChatOpenAI):
         :param url: URL of the listing server
         :type url: str, optional
         :return: A list of descriptions of the available models
-        :rtype: list[dict]
+        :rtype: list[ModelInfo]
         """
         try:
             if dartmouth_chat_api_key is None:
@@ -511,11 +511,8 @@ class ChatDartmouth(ChatOpenAI):
             ) from e
         listing = CloudModelListing(api_key=dartmouth_chat_api_key, url=url)
         models = listing.list(base_only=base_only)
-        # Some /models endpoints return the model list in a field:
-        if "data" in models:
-            models = models["data"]
 
-        return filter_dartmouth_chat_models(models, exclude_tag="embedding")
+        return [m for m in models if not m.is_embedding]
 
     def invoke(self, *args, **kwargs) -> BaseMessage:
         """Invokes the model to get a response to a query.

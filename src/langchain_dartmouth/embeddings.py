@@ -5,8 +5,7 @@ import os
 from typing import Any, Callable, List, Optional
 
 from langchain_dartmouth.definitions import CLOUD_BASE_URL
-from langchain_dartmouth.model_listing import CloudModelListing
-from langchain_dartmouth.utils import filter_dartmouth_chat_models
+from langchain_dartmouth.model_listing import CloudModelListing, ModelInfo
 
 
 class DartmouthEmbeddings(OpenAIEmbeddings):
@@ -79,7 +78,7 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
     def list(
         dartmouth_chat_api_key: str | None = None,
         url: str = CLOUD_BASE_URL,
-    ) -> list[dict]:
+    ) -> list[ModelInfo]:
         """List the models available through ``DartmouthEmbeddings``.
 
         :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
@@ -87,7 +86,7 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
         :param url: URL of the listing server
         :type url: str, optional
         :return: A list of descriptions of the available models
-        :rtype: list[dict]
+        :rtype: list[ModelInfo]
         """
         try:
             if dartmouth_chat_api_key is None:
@@ -99,11 +98,8 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
         listing = CloudModelListing(api_key=dartmouth_chat_api_key, url=url)
         # Embedding models can't be workspace models, so hardcode to base-only
         models = listing.list(base_only=True)
-        # Some /models endpoints return the model list in a field:
-        if "data" in models:
-            models = models["data"]
 
-        return filter_dartmouth_chat_models(models, include_tag="embedding")
+        return [m for m in models if m.is_embedding]
 
     def embed_query(self, text: str, **kwargs: Any) -> List[float]:
         """Call out to the embedding endpoint to retrieve the embedding of the query text.

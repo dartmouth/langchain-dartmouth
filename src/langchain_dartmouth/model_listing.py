@@ -2,11 +2,92 @@
 
 from langchain_dartmouth.definitions import USER_AGENT
 
-
+from pydantic import BaseModel, ValidationInfo, model_validator, field_validator
 import requests
 from dartmouth_auth import get_jwt
 
-from typing import List
+from typing import Any, ClassVar, List, Literal
+
+
+class ModelInfo(BaseModel):
+    """A class representing information about a model
+    (large language model, embedding model, ...) and
+    its capabilities and properties.
+    """
+
+    id: str
+    """ID to use to access the model"""
+    name: str | None = None
+    """A human-readable name of the model"""
+    description: str | None = None
+    """A description of the model (as shown at Dartmouth Chat)"""
+    is_embedding: bool | None = None
+    """Whether this model can be used as an embedding model"""
+    capabilities: list[str] | None = None
+    """Capabilities of the model"""
+    is_local: bool | None = None
+    """
+    Whether the model is hosted on-prem by Dartmouth (True),
+    or off-prem by a third party (False)."""
+    cost: Literal["undefined", "free", "$", "$$", "$$$", "$$$$"] | None = None
+    """The relative cost of the model (more '$' signs means more expensive)."""
+
+    _relevant_capabilities: ClassVar[list[str]] = ["vision", "usage"]
+
+    @model_validator(mode="before")
+    @classmethod
+    def flatten_meta(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "info" in data:
+                meta = data["info"].pop("meta")
+            elif "meta" in data:
+                meta = data.pop("meta")
+            else:
+                return data
+            data["description"] = meta.get("description")
+            data["capabilities"] = meta.get("capabilities", {})
+
+            # Pass all tags, will be validated in field validators
+            data["is_local"] = meta.get("tags", [])
+            data["is_embedding"] = meta.get("tags", [])
+            data["cost"] = meta.get("tags", [])
+
+        return data
+
+    @field_validator("is_embedding", mode="before")
+    @classmethod
+    def set_is_embedding(cls, v: Any, info: ValidationInfo):
+        tags = v or dict()
+        tag_names = {t["name"].lower() for t in tags if isinstance(t, dict)}
+        return "embedding" in tag_names
+
+    @field_validator("is_local", mode="before")
+    @classmethod
+    def set_is_local(cls, v: Any, info: ValidationInfo):
+        tags = v or dict()
+        tag_names = {t["name"].lower() for t in tags if isinstance(t, dict)}
+        return "Local".lower() in tag_names
+
+    @field_validator("capabilities", mode="before")
+    @classmethod
+    def get_capabilities(cls, v: Any, info: ValidationInfo):
+        capabilities = v or dict()
+        return [
+            c.lower()
+            for c, enabled in capabilities.items()
+            if enabled and c.lower() in cls._relevant_capabilities
+        ]
+
+    @field_validator("cost", mode="before")
+    @classmethod
+    def extract_cost(cls, v: Any, info: ValidationInfo):
+        tags = v
+        for tag in tags:
+            if tag["name"].lower() == "free":
+                return "free"
+            if tag["name"].startswith("$"):
+                return tag["name"]
+        return "undefined"
 
 
 class BaseModelListing:
@@ -22,7 +103,7 @@ class BaseModelListing:
         """Override this method in the derived class"""
         return NotImplementedError
 
-    def list():
+    def list(self):
         """Override this method in the derived class"""
         return NotImplementedError
 
@@ -64,16 +145,31 @@ class CloudModelListing(BaseModelListing):
     def _authenticate(self):
         self.SESSION.headers.update({"Authorization": f"Bearer {self.api_key}"})
 
-    def list(self, base_only: bool = False) -> List[dict]:
+    def list(self, base_only: bool = False) -> List[ModelInfo]:
         """Get a list of available Cloud models.
 
         :param base_only: Whether return only base models or customized models, defaults to False
         :type base_only: bool, optional
         :return: List of model descriptions
-        :rtype: List[dict]
+        :rtype: List[ModelInfo]
         """
         resp = self.SESSION.get(
             url=self.url + f"v1/models{'/base' if base_only else ''}"
         )
         resp.raise_for_status()
-        return resp.json()
+        cloud_models = resp.json()
+        if "data" in cloud_models:
+            cloud_models = cloud_models["data"]
+        return [ModelInfo.model_validate(m) for m in cloud_models]
+
+
+if __name__ == "__main__":
+    import os
+
+    models = CloudModelListing(
+        api_key=os.environ["DARTMOUTH_CHAT_API_KEY"],
+        url="https://chat.dartmouth.edu/api/",
+    ).list(base_only=True)
+
+    for model in models:
+        print(model)
