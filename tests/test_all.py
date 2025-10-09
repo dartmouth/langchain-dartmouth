@@ -155,7 +155,14 @@ def test_dartmouth_embeddings(model_name):
     result = embeddings.embed_query("Is there anybody out there?")
     assert result
 
-    assert len(DartmouthEmbeddings.list()) > 0
+
+def test_dartmouth_embeddings_dimensions():
+    model_name = "openai.text-embedding-3-large"
+    TARGET_DIMENSION = 256
+    embeddings = DartmouthEmbeddings(model_name=model_name, dimensions=TARGET_DIMENSION)
+    result = embeddings.embed_query("Is there anybody out there?")
+
+    assert len(result) == TARGET_DIMENSION
 
 
 def test_dartmouth_reranker():

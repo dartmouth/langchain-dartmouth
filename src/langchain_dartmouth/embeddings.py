@@ -15,6 +15,8 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
     :type model_name: str, optional
     :param model_kwargs: Keyword arguments to pass to the model.
     :type model_kwargs: dict, optional
+    :param dimensions: The number of dimensions the resulting output embeddings should have. Not supported by all models.
+    :type dimensions: int, optional
     :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
     :param embeddings_server_url: URL pointing to an embeddings endpoint, defaults to ``"https://chat.dartmouth.edu/api/"``.
     :type embeddings_server_url: str, optional
@@ -43,14 +45,16 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
         self,
         model_name: str = "bge-large-en-v1-5",
         model_kwargs: Optional[dict] = None,
+        dimensions: Optional[int] = None,
         dartmouth_chat_api_key: Optional[str] = None,
-        authenticator: Optional[Callable] = None,
         embeddings_server_base_url: Optional[str] = None,
     ):
         """Initializes the object"""
         kwargs: dict[str, Any] = dict()
         kwargs["default_headers"] = {"User-Agent": USER_AGENT}
         kwargs["model"] = model_name
+        kwargs["model_kwargs"] = model_kwargs if model_kwargs else {}
+        kwargs["dimensions"] = dimensions
         if embeddings_server_base_url is not None:
             kwargs["openai_api_base"] = embeddings_server_base_url
         else:
