@@ -50,7 +50,7 @@ class ModelInfo(BaseModel):
             else:
                 return data
             data["description"] = meta.get("description")
-            data["capabilities"] = meta.get("capabilities", {}) | {
+            data["capabilities"] = (meta.get("capabilities") or dict()) | {
                 "tags": meta.get("tags", [])
             }
 
@@ -184,7 +184,7 @@ if __name__ == "__main__":
 
     models = CloudModelListing(
         api_key=os.environ["DARTMOUTH_CHAT_API_KEY"],
-        url="https://chat.dartmouth.edu/api/",
+        url=os.environ["LCD_CLOUD_BASE_URL"],
     ).list(base_only=True)
 
     for model in models:
