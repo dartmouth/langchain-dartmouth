@@ -49,7 +49,6 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
         dartmouth_chat_api_key: Optional[str] = None,
         embeddings_server_base_url: Optional[str] = None,
     ):
-        """Initializes the object"""
         kwargs: dict[str, Any] = dict()
         kwargs["default_headers"] = {"User-Agent": USER_AGENT}
         kwargs["model"] = model_name
