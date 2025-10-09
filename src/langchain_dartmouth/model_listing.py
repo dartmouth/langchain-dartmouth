@@ -37,6 +37,7 @@ class ModelInfo(BaseModel):
         "usage",  # Model reports token usage in response_metadata
         "reasoning",  # Model supports reasoning_effort
         "hybrid reasoning",  # Model supports reasoning_effort as an optional variable
+        "tool calling",  # Model supports tool calling a.k.a. function calling
     ]
 
     @model_validator(mode="before")

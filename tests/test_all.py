@@ -1,4 +1,5 @@
 import os
+from typing import Literal
 
 import pytest
 
@@ -109,6 +110,55 @@ def test_chat_dartmouth_bad_key():
     llm = ChatDartmouth(dartmouth_chat_api_key="Bad")
     with pytest.raises(InvalidKeyError):
         llm.invoke("Won't work!")
+
+
+@pytest.mark.parametrize(
+    "model_name",
+    [
+        "default",
+    ]
+    + [
+        model.id
+        for model in ChatDartmouth.list()
+        if (model.capabilities and "tool calling" in model.capabilities)
+    ],
+)
+def test_chat_dartmouth_tool_use(model_name):
+
+    if "openai_responses" in model_name:
+        pytest.skip(
+            "OpenAI Responses models currently do not support tool calling via the API."
+        )
+
+    from langchain_core.tools import tool
+
+    TEST_STATUS = "A-OK"
+
+    @tool
+    def status() -> str:
+        """Get your current status"""
+        return TEST_STATUS
+
+    if model_name == "default":
+        llm = ChatDartmouth(
+            max_tokens=1024,
+            streaming=True,
+        )
+    else:
+        llm = ChatDartmouth(
+            model_name=model_name,
+            max_tokens=1024,
+            streaming=True,
+        )
+    llm_with_tools = llm.bind_tools(tools=[status])
+
+    response = llm_with_tools.invoke("What is your status")
+
+    assert response.tool_calls  # type: ignore
+
+    result = status.invoke(response.tool_calls[0]["args"])  # type: ignore
+
+    assert result == TEST_STATUS
 
 
 def test_litellm_model_list():
