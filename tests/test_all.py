@@ -198,10 +198,16 @@ def test_streaming():
 
 @pytest.mark.parametrize(
     "model_name",
-    [model.id for model in DartmouthEmbeddings.list()],
+    [
+        "default",
+    ]
+    + [model.id for model in DartmouthEmbeddings.list()],
 )
 def test_dartmouth_embeddings(model_name):
-    embeddings = DartmouthEmbeddings(model_name=model_name)
+    if model_name == "default":
+        embeddings = DartmouthEmbeddings()
+    else:
+        embeddings = DartmouthEmbeddings(model_name=model_name)
     result = embeddings.embed_query("Is there anybody out there?")
     assert result
 

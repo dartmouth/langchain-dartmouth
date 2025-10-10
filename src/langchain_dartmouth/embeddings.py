@@ -11,7 +11,7 @@ from langchain_dartmouth.model_listing import CloudModelListing, ModelInfo
 class DartmouthEmbeddings(OpenAIEmbeddings):
     """Embedding models deployed on Dartmouth's cluster.
 
-    :param model_name: The name of the embedding model to use, defaults to ``"bge-large-en-v1-5"``.
+    :param model_name: The name of the embedding model to use, defaults to ``"baai.bge-large-en-v1-5"``.
     :type model_name: str, optional
     :param model_kwargs: Keyword arguments to pass to the model.
     :type model_kwargs: dict, optional
@@ -43,7 +43,7 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
 
     def __init__(
         self,
-        model_name: str = "bge-large-en-v1-5",
+        model_name: str = "baai.bge-large-en-v1-5",
         model_kwargs: Optional[dict] = None,
         dimensions: Optional[int] = None,
         dartmouth_chat_api_key: Optional[str] = None,
