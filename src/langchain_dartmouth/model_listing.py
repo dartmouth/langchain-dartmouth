@@ -1,16 +1,106 @@
 """Helper class to interact with the model listing API"""
 
-from langchain_dartmouth.definitions import (
-    MODEL_LISTING_BASE_URL,
-    CLOUD_BASE_URL,
-    USER_AGENT,
-)
+from langchain_dartmouth.definitions import USER_AGENT
 
-
+from pydantic import BaseModel, ValidationInfo, model_validator, field_validator
 import requests
 from dartmouth_auth import get_jwt
 
-from typing import Literal, List
+from typing import Any, ClassVar, List, Literal
+
+
+class ModelInfo(BaseModel):
+    """A class representing information about a model
+    (large language model, embedding model, ...) and
+    its capabilities and properties.
+    """
+
+    id: str
+    """ID to use to access the model"""
+    name: str | None = None
+    """A human-readable name of the model"""
+    description: str | None = None
+    """A description of the model (as shown at Dartmouth Chat)"""
+    is_embedding: bool | None = None
+    """Whether this model can be used as an embedding model"""
+    capabilities: list[str] | None = None
+    """Capabilities of the model"""
+    is_local: bool | None = None
+    """
+    Whether the model is hosted on-prem by Dartmouth (True),
+    or off-prem by a third party (False)."""
+    cost: Literal["undefined", "free", "$", "$$", "$$$", "$$$$"] | None = None
+    """The relative cost of the model (more '$' signs means more expensive)."""
+
+    _relevant_capabilities: ClassVar[list[str]] = [
+        "vision",  # Model can process images
+        "usage",  # Model reports token usage in response_metadata
+        "reasoning",  # Model supports reasoning_effort
+        "hybrid reasoning",  # Model supports reasoning_effort as an optional variable
+        "tool calling",  # Model supports tool calling a.k.a. function calling
+    ]
+
+    @model_validator(mode="before")
+    @classmethod
+    def flatten_meta(cls, data: Any) -> Any:
+        if isinstance(data, dict):
+            if "info" in data:
+                meta = data["info"].pop("meta")
+            elif "meta" in data:
+                meta = data.pop("meta")
+            else:
+                return data
+            data["description"] = meta.get("description")
+            data["capabilities"] = (meta.get("capabilities") or dict()) | {
+                "tags": meta.get("tags", [])
+            }
+
+            # Pass all tags, will be validated in field validators
+            data["is_local"] = meta.get("tags", [])
+            data["is_embedding"] = meta.get("tags", [])
+            data["cost"] = meta.get("tags", [])
+
+        return data
+
+    @field_validator("is_embedding", mode="before")
+    @classmethod
+    def set_is_embedding(cls, v: Any, info: ValidationInfo):
+        tags = v or dict()
+        tag_names = {t["name"].lower() for t in tags if isinstance(t, dict)}
+        return "embedding" in tag_names
+
+    @field_validator("is_local", mode="before")
+    @classmethod
+    def set_is_local(cls, v: Any, info: ValidationInfo):
+        tags = v or dict()
+        tag_names = {t["name"].lower() for t in tags if isinstance(t, dict)}
+        return "Local".lower() in tag_names
+
+    @field_validator("capabilities", mode="before")
+    @classmethod
+    def get_capabilities(cls, v: Any, info: ValidationInfo):
+        capabilities = [
+            c.lower()
+            for c, enabled in v.items()
+            if enabled and c.lower() in cls._relevant_capabilities
+        ] + [
+            c["name"].lower()
+            for c in v.get("tags", [])
+            if c["name"].lower() in cls._relevant_capabilities
+        ]
+
+        return capabilities
+
+    @field_validator("cost", mode="before")
+    @classmethod
+    def extract_cost(cls, v: Any, info: ValidationInfo):
+        tags = v
+        for tag in tags:
+            if tag["name"].lower() == "free":
+                return "free"
+            if tag["name"].startswith("$"):
+                return tag["name"]
+        return "undefined"
 
 
 class BaseModelListing:
@@ -26,7 +116,7 @@ class BaseModelListing:
         """Override this method in the derived class"""
         return NotImplementedError
 
-    def list():
+    def list(self):
         """Override this method in the derived class"""
         return NotImplementedError
 
@@ -68,56 +158,35 @@ class CloudModelListing(BaseModelListing):
     def _authenticate(self):
         self.SESSION.headers.update({"Authorization": f"Bearer {self.api_key}"})
 
-    def list(self, base_only: bool = False) -> List[dict]:
+    def list(self, base_only: bool = False) -> List[ModelInfo]:
         """Get a list of available Cloud models.
 
         :param base_only: Whether return only base models or customized models, defaults to False
         :type base_only: bool, optional
         :return: List of model descriptions
-        :rtype: List[dict]
+        :rtype: List[ModelInfo]
         """
         resp = self.SESSION.get(
             url=self.url + f"v1/models{'/base' if base_only else ''}"
         )
         resp.raise_for_status()
-        return resp.json()
-
-
-def reformat_model_spec(model_spec: dict) -> dict:
-    """Reformats the model specification returned by Open WebUI to align with our on-premise spec format.
-
-    :param model_spec: Model spec returned from Open WebUI
-    :type model_spec: dict
-    :return: Model spec using the schema of Dartmouth's listing API.
-    :rtype: dict
-    """
-    new_spec = dict()
-    new_spec["name"] = model_spec["id"]
-    new_spec["provider"] = model_spec["id"].split(sep=".", maxsplit=1)[0]
-    new_spec["type"] = "llm"
-
-    def get_capablities(caps: List[dict[str, str]]) -> List[str]:
-        capabilities = set(["chat"])  # All models have chat capability
-        for cap in caps:
-            capabilities.add(cap["name"].lower())
-        return list(capabilities)
-
-    try:
-        new_spec["capabilities"] = get_capablities(model_spec["meta"]["tags"])
-    except KeyError:
-        # Some /models endpoints don't provide the "meta" key
-        pass
-
-    new_spec["server"] = "dartmouth-chat"
-    new_spec["parameters"] = dict()
-    return new_spec
+        cloud_models = resp.json()
+        if "data" in cloud_models:
+            cloud_models = cloud_models["data"]
+        return [
+            ModelInfo.model_validate(m)
+            for m in cloud_models
+            if m.get("is_active", True)
+        ]
 
 
 if __name__ == "__main__":
     import os
 
-    listing = DartmouthModelListing(os.environ["DARTMOUTH_API_KEY"])
-    print(listing.list(server="text-generation-inference", capabilities=["chat"]))
+    models = CloudModelListing(
+        api_key=os.environ["DARTMOUTH_CHAT_API_KEY"],
+        url=os.environ["LCD_CLOUD_BASE_URL"],
+    ).list(base_only=True)
 
-    listing = CloudModelListing(os.environ["DARTMOUTH_CHAT_API_KEY"])
-    print(listing.list())
+    for model in models:
+        print(model)
