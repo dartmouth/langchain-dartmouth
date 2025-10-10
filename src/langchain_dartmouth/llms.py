@@ -608,6 +608,16 @@ class ChatDartmouth(ChatOpenAI):
                 raise e
 
 
+def ChatDartmouthCloud(*args, **kwargs):
+    warnings.warn(
+        "ChatDartmouthCloud is deprecated and will be removed in a future update. Use `ChatDartmouth` as a drop-in replacement!"
+    )
+    return ChatDartmouth(*args, **kwargs)
+
+
+setattr(ChatDartmouthCloud, "list", ChatDartmouth.list)
+
 if __name__ == "__main__":
     print(DartmouthLLM.list())
     print(ChatDartmouth.list())
+    print(ChatDartmouthCloud.list())
