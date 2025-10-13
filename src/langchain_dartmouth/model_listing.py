@@ -566,13 +566,19 @@ class CloudModelListing(BaseModelListing):
         Pydantic model, which extracts capabilities, costs, and other properties
         from the API response.
         """
-        resp = self.SESSION.get(
-            url=self.url + f"v1/models{'/base' if base_only else ''}"
-        )
+        resp = self.SESSION.get(url=self.url + f"v1/models")
         resp.raise_for_status()
         cloud_models = resp.json()
         if "data" in cloud_models:
             cloud_models = cloud_models["data"]
+
+        if base_only:
+
+            def is_base_model(m):
+                return m.get("info", {}).get("base_model_id") is None
+
+            cloud_models = [m for m in cloud_models if is_base_model(m)]
+
         return [
             ModelInfo.model_validate(m)
             for m in cloud_models
