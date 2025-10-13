@@ -55,7 +55,7 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
         kwargs["model_kwargs"] = model_kwargs if model_kwargs else {}
         kwargs["dimensions"] = dimensions
         # Deactivate tokenization and context length checking
-        kwargs["check_embedding_ctx_length=False"] = False
+        kwargs["check_embedding_ctx_length"] = False
         if embeddings_server_base_url is not None:
             kwargs["openai_api_base"] = embeddings_server_base_url
         else:
