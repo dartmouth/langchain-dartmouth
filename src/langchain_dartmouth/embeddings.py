@@ -54,6 +54,8 @@ class DartmouthEmbeddings(OpenAIEmbeddings):
         kwargs["model"] = model_name
         kwargs["model_kwargs"] = model_kwargs if model_kwargs else {}
         kwargs["dimensions"] = dimensions
+        # Deactivate tiktoken encoding of input text before embedding
+        kwargs["tiktoken_enabled"] = False
         if embeddings_server_base_url is not None:
             kwargs["openai_api_base"] = embeddings_server_base_url
         else:
