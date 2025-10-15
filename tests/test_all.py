@@ -1,6 +1,7 @@
 import os
 from typing import Literal
 
+import openai
 import pytest
 
 from langchain_dartmouth.llms import (
@@ -213,10 +214,15 @@ def test_dartmouth_embeddings(model_name):
 
 
 def test_dartmouth_embeddings_dimensions():
-    model_name = "openai.text-embedding-3-large"
-    TARGET_DIMENSION = 256
-    embeddings = DartmouthEmbeddings(model_name=model_name, dimensions=TARGET_DIMENSION)
-    result = embeddings.embed_query("Is there anybody out there?")
+    try:
+        model_name = "openai.text-embedding-3-large"
+        TARGET_DIMENSION = 256
+        embeddings = DartmouthEmbeddings(
+            model_name=model_name, dimensions=TARGET_DIMENSION
+        )
+        result = embeddings.embed_query("Is there anybody out there?")
+    except openai.InternalServerError:
+        pytest.skip(f"Model not found: {model_name}")
 
     assert len(result) == TARGET_DIMENSION
 
