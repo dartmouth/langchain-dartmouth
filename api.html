@@ -1,0 +1,999 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Embeddings &mdash; langchain_dartmouth 0.3.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="_static/autodoc_pydantic.css" />
+      <link rel="stylesheet" type="text/css" href="_static/css/custom.css?v=9b771779" />
+
+  
+    <link rel="shortcut icon" href="_static/d-pine.png"/>
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=e259d695"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Migration Guide to v0.3.x" href="migration.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            langchain_dartmouth
+              <img src="_static/langchain_dartmouth-logo-light.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Documentation</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="migration.html">Migration Guide to v0.3.x</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Embeddings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings"><code class="docutils literal notranslate"><span class="pre">DartmouthEmbeddings</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings.list"><code class="docutils literal notranslate"><span class="pre">DartmouthEmbeddings.list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings.aembed_documents"><code class="docutils literal notranslate"><span class="pre">DartmouthEmbeddings.aembed_documents()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings.aembed_query"><code class="docutils literal notranslate"><span class="pre">DartmouthEmbeddings.aembed_query()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings.embed_documents"><code class="docutils literal notranslate"><span class="pre">DartmouthEmbeddings.embed_documents()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings.embed_query"><code class="docutils literal notranslate"><span class="pre">DartmouthEmbeddings.embed_query()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-langchain_dartmouth.llms">Large Language Models</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.llms.DartmouthLLM"><code class="docutils literal notranslate"><span class="pre">DartmouthLLM</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.llms.DartmouthLLM.list"><code class="docutils literal notranslate"><span class="pre">DartmouthLLM.list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.llms.DartmouthLLM.ainvoke"><code class="docutils literal notranslate"><span class="pre">DartmouthLLM.ainvoke()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.llms.DartmouthLLM.invoke"><code class="docutils literal notranslate"><span class="pre">DartmouthLLM.invoke()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.llms.ChatDartmouth"><code class="docutils literal notranslate"><span class="pre">ChatDartmouth</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.llms.ChatDartmouth.validate_temperature"><code class="docutils literal notranslate"><span class="pre">ChatDartmouth.validate_temperature</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.llms.ChatDartmouth.list"><code class="docutils literal notranslate"><span class="pre">ChatDartmouth.list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.llms.ChatDartmouth.ainvoke"><code class="docutils literal notranslate"><span class="pre">ChatDartmouth.ainvoke()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.llms.ChatDartmouth.invoke"><code class="docutils literal notranslate"><span class="pre">ChatDartmouth.invoke()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-langchain_dartmouth.retrievers.document_compressors">Reranking</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.retrievers.document_compressors.DartmouthReranker"><code class="docutils literal notranslate"><span class="pre">DartmouthReranker</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.retrievers.document_compressors.DartmouthReranker.list"><code class="docutils literal notranslate"><span class="pre">DartmouthReranker.list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.retrievers.document_compressors.DartmouthReranker.compress_documents"><code class="docutils literal notranslate"><span class="pre">DartmouthReranker.compress_documents()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-langchain_dartmouth.model_listing">Model Listing</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo"><code class="docutils literal notranslate"><span class="pre">ModelInfo</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo.id"><code class="docutils literal notranslate"><span class="pre">ModelInfo.id</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo.name"><code class="docutils literal notranslate"><span class="pre">ModelInfo.name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo.description"><code class="docutils literal notranslate"><span class="pre">ModelInfo.description</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo.is_embedding"><code class="docutils literal notranslate"><span class="pre">ModelInfo.is_embedding</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo.capabilities"><code class="docutils literal notranslate"><span class="pre">ModelInfo.capabilities</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo.is_local"><code class="docutils literal notranslate"><span class="pre">ModelInfo.is_local</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo.cost"><code class="docutils literal notranslate"><span class="pre">ModelInfo.cost</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.model_listing.DartmouthModelListing"><code class="docutils literal notranslate"><span class="pre">DartmouthModelListing</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.model_listing.DartmouthModelListing.list"><code class="docutils literal notranslate"><span class="pre">DartmouthModelListing.list()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.model_listing.CloudModelListing"><code class="docutils literal notranslate"><span class="pre">CloudModelListing</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#langchain_dartmouth.model_listing.CloudModelListing.list"><code class="docutils literal notranslate"><span class="pre">CloudModelListing.list()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-langchain_dartmouth.definitions">Base URLs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.definitions.EMBEDDINGS_BASE_URL"><code class="docutils literal notranslate"><span class="pre">EMBEDDINGS_BASE_URL</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.definitions.RERANK_BASE_URL"><code class="docutils literal notranslate"><span class="pre">RERANK_BASE_URL</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.definitions.LLM_BASE_URL"><code class="docutils literal notranslate"><span class="pre">LLM_BASE_URL</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.definitions.CLOUD_BASE_URL"><code class="docutils literal notranslate"><span class="pre">CLOUD_BASE_URL</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#langchain_dartmouth.definitions.MODEL_LISTING_BASE_URL"><code class="docutils literal notranslate"><span class="pre">MODEL_LISTING_BASE_URL</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">langchain_dartmouth</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Embeddings</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-langchain_dartmouth.embeddings">
+<span id="embeddings"></span><h1>Embeddings<a class="headerlink" href="#module-langchain_dartmouth.embeddings" title="Link to this heading"></a></h1>
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="langchain_dartmouth.embeddings.DartmouthEmbeddings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.embeddings.</span></span><span class="sig-name descname"><span class="pre">DartmouthEmbeddings</span></span><a class="headerlink" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings" title="Link to this definition"></a></dt>
+<dd><p>Embedding models deployed on Dartmouth’s cluster.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the embedding model to use, defaults to <code class="docutils literal notranslate"><span class="pre">&quot;baai.bge-large-en-v1-5&quot;</span></code>.</p></li>
+<li><p><strong>model_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments to pass to the model.</p></li>
+<li><p><strong>dimensions</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of dimensions the resulting output embeddings should have. Not supported by all models.</p></li>
+<li><p><strong>dartmouth_chat_api_key</strong> – A Dartmouth Chat API key (obtainable from <a class="reference external" href="https://chat.dartmouth.edu">https://chat.dartmouth.edu</a>). If not specified, it is attempted to be inferred from an environment variable <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_CHAT_API_KEY</span></code>.</p></li>
+<li><p><strong>embeddings_server_url</strong> (<em>str</em><em>, </em><em>optional</em>) – URL pointing to an embeddings endpoint, defaults to <code class="docutils literal notranslate"><span class="pre">&quot;https://chat.dartmouth.edu/api/&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>With an environment variable named <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_CHAT_API_KEY</span></code> pointing to your key obtained from <a class="reference external" href="https://chat.dartmouth.edu">Dartmouth Chat</a>, using anembedding model only takes a few lines of code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_dartmouth.embeddings</span><span class="w"> </span><span class="kn">import</span> <span class="n">DartmouthEmbeddings</span>
+
+<span class="n">embeddings</span> <span class="o">=</span> <span class="n">DartmouthEmbeddings</span><span class="p">()</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">embeddings</span><span class="o">.</span><span class="n">embed_query</span><span class="p">(</span><span class="s2">&quot;Hello? Is there anybody in there?&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.embeddings.DartmouthEmbeddings.list">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dartmouth_chat_api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://chat.dartmouth.edu/api/'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings.list" title="Link to this definition"></a></dt>
+<dd><p>List the models available through <code class="docutils literal notranslate"><span class="pre">DartmouthEmbeddings</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dartmouth_chat_api_key</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>A Dartmouth Chat API key (obtainable from <a class="reference external" href="https://chat.dartmouth.edu">https://chat.dartmouth.edu</a>). If not specified, it is attempted to be inferred from an environment variable <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_CHAT_API_KEY</span></code>.</p>
+</p></li>
+<li><p><strong>url</strong> (<em>str</em><em>, </em><em>optional</em>) – URL of the listing server</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of descriptions of the available models</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo" title="langchain_dartmouth.model_listing.ModelInfo">ModelInfo</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.embeddings.DartmouthEmbeddings.aembed_documents">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aembed_documents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">texts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings.aembed_documents" title="Link to this definition"></a></dt>
+<dd><p>Async Call to the embedding endpoint to retrieve the embeddings of multiple texts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – The list of texts to embed.</p></li>
+<li><p><strong>texts</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>chunk_size</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Embeddings for the texts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[List[float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.embeddings.DartmouthEmbeddings.aembed_query">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">aembed_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings.aembed_query" title="Link to this definition"></a></dt>
+<dd><p>Async Call to the embedding endpoint to retrieve the embedding of the query text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – The text to embed.</p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Embeddings for the text.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.embeddings.DartmouthEmbeddings.embed_documents">
+<span class="sig-name descname"><span class="pre">embed_documents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">texts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunk_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings.embed_documents" title="Link to this definition"></a></dt>
+<dd><p>Call out to the embedding endpoint to retrieve the embeddings of multiple texts.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – The list of texts to embed.</p></li>
+<li><p><strong>texts</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>)</p></li>
+<li><p><strong>chunk_size</strong> (<em>int</em><em> | </em><em>None</em>)</p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Embeddings for the texts.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[List[float]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.embeddings.DartmouthEmbeddings.embed_query">
+<span class="sig-name descname"><span class="pre">embed_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.embeddings.DartmouthEmbeddings.embed_query" title="Link to this definition"></a></dt>
+<dd><p>Call out to the embedding endpoint to retrieve the embedding of the query text.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>text</strong> (<em>str</em>) – The text to embed.</p></li>
+<li><p><strong>kwargs</strong> (<em>Any</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Embeddings for the text.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[float]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-langchain_dartmouth.llms">
+<span id="large-language-models"></span><h1>Large Language Models<a class="headerlink" href="#module-langchain_dartmouth.llms" title="Link to this heading"></a></h1>
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="langchain_dartmouth.llms.DartmouthLLM">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.llms.</span></span><span class="sig-name descname"><span class="pre">DartmouthLLM</span></span><a class="headerlink" href="#langchain_dartmouth.llms.DartmouthLLM" title="Link to this definition"></a></dt>
+<dd><p>Dartmouth-deployed Large Language Models. Use this class for non-chat models
+(e.g., <a class="reference external" href="https://huggingface.co/codellama/CodeLlama-13b-Python-hf">CodeLlama 13B</a>).</p>
+<p>This class does <strong>not</strong> format the prompt to adhere to any required templates.
+The string you pass to it is exactly the string received by the LLM. If the
+desired model requires a chat template (e.g.,
+<a class="reference external" href="https://llama.meta.com/docs/model-cards-and-prompt-formats/llama3_1/">Llama 3.1 Instruct</a>),
+you may want to use <a class="reference internal" href="#langchain_dartmouth.llms.ChatDartmouth" title="langchain_dartmouth.llms.ChatDartmouth"><code class="xref py py-class docutils literal notranslate"><span class="pre">ChatDartmouth</span></code></a> instead.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em><em>, </em><em>optional</em>) – Name of the model to use, defaults to <code class="docutils literal notranslate"><span class="pre">&quot;codellama-13b-python-hf&quot;</span></code>.</p></li>
+<li><p><strong>temperature</strong> (<em>float</em><em>, </em><em>optional</em>) – Temperature to use for sampling (higher temperature means more varied outputs), defaults to <code class="docutils literal notranslate"><span class="pre">0.8</span></code>.</p></li>
+<li><p><strong>max_new_tokens</strong> (<em>int</em>) – Maximum number of generated tokens, defaults to <code class="docutils literal notranslate"><span class="pre">512</span></code>.</p></li>
+<li><p><strong>streaming</strong> (<em>bool</em>) – Whether to generate a stream of tokens asynchronously, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>top_k</strong> (<em>int</em><em>, </em><em>optional</em>) – The number of highest probability vocabulary tokens to keep for top-k-filtering.</p></li>
+<li><p><strong>top_p</strong> (<em>float</em><em>, </em><em>optional</em>) – If set to &lt; 1, only the smallest set of most probable tokens with probabilities that add up to <code class="docutils literal notranslate"><span class="pre">top_p</span></code> or higher are kept for generation, defaults to <code class="docutils literal notranslate"><span class="pre">0.95</span></code>.</p></li>
+<li><p><strong>typical_p</strong> (<em>float</em><em>, </em><em>optional</em>) – Typical Decoding mass. See <a class="reference external" href="https://arxiv.org/abs/2202.00666">Typical Decoding for Natural Language Generation</a> for more information, defaults to <code class="docutils literal notranslate"><span class="pre">0.95</span></code>.</p></li>
+<li><p><strong>repetition_penalty</strong> (<em>float</em><em>, </em><em>optional</em>) – The parameter for repetition penalty. 1.0 means no penalty. See <a class="reference external" href="https://arxiv.org/pdf/1909.05858.pdf">this paper</a> for more details.</p></li>
+<li><p><strong>return_full_text</strong> (<em>bool</em>) – Whether to prepend the prompt to the generated text, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>truncate</strong> (<em>int</em><em>, </em><em>optional</em>) – Truncate inputs tokens to the given size</p></li>
+<li><p><strong>stop_sequences</strong> (<em>List</em><em>[</em><em>str</em><em>]</em><em>, </em><em>optional</em>) – Stop generating tokens if a member of <code class="docutils literal notranslate"><span class="pre">stop_sequences</span></code> is generated.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Random sampling seed</p></li>
+<li><p><strong>do_sample</strong> (<em>bool</em>) – Activate logits sampling, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>watermark</strong> (<em>bool</em>) – Watermarking with <a class="reference external" href="https://arxiv.org/abs/2301.10226">A Watermark for Large Language Models</a>, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><strong>model_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Parameters to pass to the model (see the documentation of LangChain’s <a class="reference external" href="https://api.python.langchain.com/en/latest/llms/langchain_community.llms.huggingface_text_gen_inference.HuggingFaceTextGenInference.html">HuggingFaceTextGenInference class</a>.)</p></li>
+<li><p><strong>dartmouth_api_key</strong> (<em>str</em><em>, </em><em>optional</em>) – A Dartmouth API key (obtainable from <a class="reference external" href="https://developer.dartmouth.edu">https://developer.dartmouth.edu</a>). If not specified, it is attempted to be inferred from an environment variable DARTMOUTH_API_KEY.</p></li>
+<li><p><strong>authenticator</strong> (<em>Callable</em><em>, </em><em>optional</em>) – A Callable returning a JSON Web Token (JWT) for authentication.</p></li>
+<li><p><strong>jwt_url</strong> (<em>str</em><em>, </em><em>optional</em>) – URL of the Dartmouth API endpoint returning a JSON Web Token (JWT).</p></li>
+<li><p><strong>inference_server_url</strong> (<em>str</em>) – URL pointing to an inference endpoint, defaults to <code class="docutils literal notranslate"><span class="pre">&quot;https://ai-api.dartmouth.edu/tgi/&quot;</span></code>.</p></li>
+<li><p><strong>timeout</strong> (<em>int</em>) – Timeout in seconds, defaults to <code class="docutils literal notranslate"><span class="pre">120</span></code></p></li>
+<li><p><strong>server_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Holds any text-generation-inference server parameters not explicitly specified</p></li>
+<li><p><strong>**_</strong> – Additional keyword arguments are silently discarded. This is to ensure interface compatibility with other langchain components.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>With an environment variable named <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_API_KEY</span></code> pointing to your key obtained from <a class="reference external" href="https://developer.dartmouth.edu">https://developer.dartmouth.edu</a>, using a Dartmouth-hosted LLM only takes a few lines of code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_dartmouth.llms</span><span class="w"> </span><span class="kn">import</span> <span class="n">DartmouthLLM</span>
+
+<span class="n">llm</span> <span class="o">=</span> <span class="n">DartmouthLLM</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;codellama-13b-hf&quot;</span><span class="p">)</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">llm</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;Write a Python script to swap two variables.&quot;&quot;)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.llms.DartmouthLLM.list">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dartmouth_api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://api.dartmouth.edu/api/ai/models/'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.llms.DartmouthLLM.list" title="Link to this definition"></a></dt>
+<dd><p>List the models available through <code class="docutils literal notranslate"><span class="pre">DartmouthLLM</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dartmouth_api_key</strong> (<em>str</em><em>, </em><em>optional</em>) – A Dartmouth API key (obtainable from <a class="reference external" href="https://developer.dartmouth.edu">https://developer.dartmouth.edu</a>). If not specified, it is attempted to be inferred from an environment variable <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_API_KEY</span></code>.</p></li>
+<li><p><strong>url</strong> (<em>str</em><em>, </em><em>optional</em>) – URL of the listing server</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of descriptions of the available models</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.llms.DartmouthLLM.ainvoke">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ainvoke</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.llms.DartmouthLLM.ainvoke" title="Link to this definition"></a></dt>
+<dd><p>Asynchronously transforms a single input into an output.</p>
+<p>See <a class="reference external" href="https://python.langchain.com/v0.1/docs/expression_language/interface/">LangChain’s API documentation</a> for details on how to use this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The LLM’s completion of the input string.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.llms.DartmouthLLM.invoke">
+<span class="sig-name descname"><span class="pre">invoke</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.llms.DartmouthLLM.invoke" title="Link to this definition"></a></dt>
+<dd><p>Transforms a single input into an output.</p>
+<p>See <a class="reference external" href="https://python.langchain.com/v0.1/docs/expression_language/interface/">LangChain’s API documentation</a> for details on how to use this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The LLM’s completion of the input string.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="langchain_dartmouth.llms.ChatDartmouth">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.llms.</span></span><span class="sig-name descname"><span class="pre">ChatDartmouth</span></span><a class="headerlink" href="#langchain_dartmouth.llms.ChatDartmouth" title="Link to this definition"></a></dt>
+<dd><p>Chat models made available by Dartmouth.</p>
+<p>Use this class if you want to use any chat model, e.g., Anthropic’s Claude or OpenAI’s GPT, made accessible by Dartmouth.</p>
+<p>Both free on-prem models, as well as paid third-party models are available.</p>
+<p>To see which models are available, which features they support, and how much they cost, run <cite>ChatDartmouth.list()</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em>) – Name of the model to use, defaults to <code class="docutils literal notranslate"><span class="pre">&quot;openai.gpt-oss-120b&quot;</span></code>.</p></li>
+<li><p><strong>streaming</strong> (<em>bool</em>) – Whether to stream the results or not, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>temperature</strong> (<em>float</em>) – Temperature to use for sampling (higher temperature means more varied outputs), defaults to <code class="docutils literal notranslate"><span class="pre">0.7</span></code>.</p></li>
+<li><p><strong>max_tokens</strong> (<em>int</em>) – Maximum number of tokens to generate, defaults to 512</p></li>
+<li><p><strong>logprobs</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to return logprobs</p></li>
+<li><p><strong>stream_usage</strong> (<em>bool</em>) – Whether to include usage metadata in streaming output. If <code class="docutils literal notranslate"><span class="pre">True</span></code>, additional message chunks will be generated during the stream including usage metadata, defaults to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
+<li><p><strong>presence_penalty</strong> (<em>float</em><em>, </em><em>optional</em>) – Penalizes repeated tokens.</p></li>
+<li><p><strong>frequency_penalty</strong> (<em>float</em><em>, </em><em>optional</em>) – Penalizes repeated tokens according to frequency.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Seed for generation</p></li>
+<li><p><strong>top_logprobs</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of most likely tokens to return at each token position, each with an associated log probability. <code class="docutils literal notranslate"><span class="pre">logprobs</span></code> must be set to true if this parameter is used.</p></li>
+<li><p><strong>logit_bias</strong> (<em>dict</em><em>, </em><em>optional</em>) – Modify the likelihood of specified tokens appearing in the completion.</p></li>
+<li><p><strong>n</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of chat completions to generate for each prompt, defaults to None (i.e., use upstream default)</p></li>
+<li><p><strong>top_p</strong> (<em>float</em><em>, </em><em>optional</em>) – Total probability mass of tokens to consider at each step.</p></li>
+<li><p><strong>model_kwargs</strong> (<em>dict</em><em>, </em><em>optional</em>) – Holds any model parameters valid for <code class="docutils literal notranslate"><span class="pre">create</span></code> call not explicitly specified.</p></li>
+<li><p><strong>dartmouth_chat_api_key</strong> (<em>str</em><em>, </em><em>optional</em>) – A Dartmouth Chat API key (see <a class="reference external" href="https://rcweb.dartmouth.edu/~d20964h/2024-12-11-dartmouth-chat-api/api_key/">here</a> for how to obtain one). If not specified, it is attempted to be inferred from an environment variable <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_CHAT_API_KEY</span></code>.</p></li>
+<li><p><strong>inference_server_url</strong> (<em>str</em><em>, </em><em>optional</em>) – The URL of the inference server (e.g., <a class="reference external" href="https://chat.dartmouth.edu/api/">https://chat.dartmouth.edu/api/</a>)</p></li>
+<li><p><strong>**_</strong> – Additional keyword arguments are silently discarded. This is to ensure interface compatibility with other langchain components.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>With an environment variable named <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_CHAT_API_KEY</span></code> pointing to your key obtained from <a class="reference external" href="https://chat.dartmouth.edu">https://chat.dartmouth.edu</a>, using a third-party LLM provided by Dartmouth only takes a few lines of code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_dartmouth.llms</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChatDartmouth</span>
+
+<span class="n">llm</span> <span class="o">=</span> <span class="n">ChatDartmouth</span><span class="p">(</span><span class="n">model_name</span><span class="o">=</span><span class="s2">&quot;openai.gpt-oss-120b&quot;</span><span class="p">)</span>
+
+<span class="n">response</span> <span class="o">=</span> <span class="n">llm</span><span class="o">.</span><span class="n">invoke</span><span class="p">(</span><span class="s2">&quot;Hi there!&quot;</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Paid cloud models are billed by token consumption using different pricing depending on their complexity. Dartmouth pays for the use, but a daily token limit per user applies.
+Your token budget is the same as in Dartmouth Chat. Learn more about credits in <a class="reference external" href="https://rc.dartmouth.edu/ai/online-resources/setting-up-credit-groups/">Dartmouth Chat’s documentation</a>.</p>
+</div>
+<dl class="py method pydantic_validator">
+<dt class="sig sig-object py" id="langchain_dartmouth.llms.ChatDartmouth.validate_temperature">
+<em class="property"><span class="pre">validator</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">validate_temperature</span></span><em class="autodoc_pydantic_validator_arrow property">&#160; <span class="pre">»</span>&#160; </em><em class="xref py py-obj"><span class="pre">all</span> <span class="pre">fields</span></em><a class="headerlink" href="#langchain_dartmouth.llms.ChatDartmouth.validate_temperature" title="Link to this definition"></a></dt>
+<dd><p>Currently o and GPT 5 models only allow temperature=1.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>values</strong> (<em>dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><em>Any</em></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.llms.ChatDartmouth.list">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dartmouth_chat_api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">base_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://chat.dartmouth.edu/api/'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.llms.ChatDartmouth.list" title="Link to this definition"></a></dt>
+<dd><p>List the models available through <code class="docutils literal notranslate"><span class="pre">ChatDartmouth</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dartmouth_chat_api_key</strong> (<em>str</em><em>, </em><em>optional</em>) – <p>A Dartmouth Chat API key (obtainable from <a class="reference external" href="https://chat.dartmouth.edu">https://chat.dartmouth.edu</a>). If not specified, it is attempted to be inferred from an environment variable <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_CHAT_API_KEY</span></code>.</p>
+</p></li>
+<li><p><strong>base_only</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, only regular Large Language Models are returned. If False, Workspace models are also returned.</p></li>
+<li><p><strong>url</strong> (<em>str</em><em>, </em><em>optional</em>) – URL of the listing server</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of descriptions of the available models</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[<a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo" title="langchain_dartmouth.model_listing.ModelInfo">ModelInfo</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.llms.ChatDartmouth.ainvoke">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ainvoke</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.llms.ChatDartmouth.ainvoke" title="Link to this definition"></a></dt>
+<dd><p>Asynchronously invokes the model to get a response to a query.</p>
+<p>See <a class="reference external" href="https://python.langchain.com/v0.1/docs/expression_language/interface/">LangChain’s API documentation</a> for details on how to use this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The LLM’s response to the prompt.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>BaseMessage</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.llms.ChatDartmouth.invoke">
+<span class="sig-name descname"><span class="pre">invoke</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.llms.ChatDartmouth.invoke" title="Link to this definition"></a></dt>
+<dd><p>Invokes the model to get a response to a query.</p>
+<p>See <a class="reference external" href="https://python.langchain.com/v0.1/docs/expression_language/interface/">LangChain’s API documentation</a> for details on how to use this method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The LLM’s response to the prompt.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>BaseMessage</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-langchain_dartmouth.retrievers.document_compressors">
+<span id="reranking"></span><h1>Reranking<a class="headerlink" href="#module-langchain_dartmouth.retrievers.document_compressors" title="Link to this heading"></a></h1>
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="langchain_dartmouth.retrievers.document_compressors.DartmouthReranker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.retrievers.document_compressors.</span></span><span class="sig-name descname"><span class="pre">DartmouthReranker</span></span><a class="headerlink" href="#langchain_dartmouth.retrievers.document_compressors.DartmouthReranker" title="Link to this definition"></a></dt>
+<dd><p>Reranks documents using a reranking model deployed in the Dartmouth cloud.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em><em>, </em><em>optional</em>) – The name of the embedding model to use, defaults to <code class="docutils literal notranslate"><span class="pre">&quot;bge-reranker-v2-m3&quot;</span></code>.</p></li>
+<li><p><strong>top_n</strong> (<em>int</em>) – Number of documents to return, defaults to <code class="docutils literal notranslate"><span class="pre">3</span></code></p></li>
+<li><p><strong>dartmouth_api_key</strong> (<em>str</em><em>, </em><em>optional</em>) – A Dartmouth API key (obtainable from <a class="reference external" href="https://developer.dartmouth.edu">https://developer.dartmouth.edu</a>). If not specified, it is attempted to be inferred from an environment variable <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_API_KEY</span></code>.</p></li>
+<li><p><strong>authenticator</strong> (<em>Callable</em><em>, </em><em>optional</em>) – A Callable returning a JSON Web Token (JWT) for authentication.</p></li>
+<li><p><strong>jwt_url</strong> (<em>str</em><em>, </em><em>optional</em>) – URL of the Dartmouth API endpoint returning a JSON Web Token (JWT).</p></li>
+<li><p><strong>embeddings_server_url</strong> (<em>str</em><em>, </em><em>optional</em>) – URL pointing to an embeddings endpoint, defaults to <code class="docutils literal notranslate"><span class="pre">&quot;https://ai-api.dartmouth.edu/tei/&quot;</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<p>With an environment variable named <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_API_KEY</span></code> pointing to your key obtained from <a class="reference external" href="https://developer.dartmouth.edu">https://developer.dartmouth.edu</a>, using a Dartmouth-hosted Reranker only takes a few lines of code:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">langchain.docstore.document</span><span class="w"> </span><span class="kn">import</span> <span class="n">Document</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">langchain_dartmouth.retrievers.document_compressors</span><span class="w"> </span><span class="kn">import</span> <span class="n">DartmouthReranker</span>
+
+<span class="n">docs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">Document</span><span class="p">(</span><span class="n">page_content</span><span class="o">=</span><span class="s2">&quot;Deep Learning is not...&quot;</span><span class="p">),</span>
+    <span class="n">Document</span><span class="p">(</span><span class="n">page_content</span><span class="o">=</span><span class="s2">&quot;Deep learning is...&quot;</span><span class="p">),</span>
+<span class="p">]</span>
+<span class="n">query</span> <span class="o">=</span> <span class="s2">&quot;What is Deep Learning?&quot;</span>
+<span class="n">reranker</span> <span class="o">=</span> <span class="n">DartmouthReranker</span><span class="p">()</span>
+<span class="n">ranked_docs</span> <span class="o">=</span> <span class="n">reranker</span><span class="o">.</span><span class="n">compress_documents</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">documents</span><span class="o">=</span><span class="n">docs</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ranked_docs</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.retrievers.document_compressors.DartmouthReranker.list">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dartmouth_api_key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://api.dartmouth.edu/api/ai/models/'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.retrievers.document_compressors.DartmouthReranker.list" title="Link to this definition"></a></dt>
+<dd><p>List the models available through <code class="docutils literal notranslate"><span class="pre">DartmouthReranker</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dartmouth_api_key</strong> (<em>str</em><em>, </em><em>optional</em>) – A Dartmouth API key (obtainable from <a class="reference external" href="https://developer.dartmouth.edu">https://developer.dartmouth.edu</a>). If not specified, it is attempted to be inferred from an environment variable <code class="docutils literal notranslate"><span class="pre">DARTMOUTH_API_KEY</span></code>.</p></li>
+<li><p><strong>url</strong> (<em>str</em><em>, </em><em>optional</em>) – URL of the listing server</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of descriptions of the available models</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.retrievers.document_compressors.DartmouthReranker.compress_documents">
+<span class="sig-name descname"><span class="pre">compress_documents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">documents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callbacks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.retrievers.document_compressors.DartmouthReranker.compress_documents" title="Link to this definition"></a></dt>
+<dd><p>Returns the most relevant documents with respect to a query.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>documents</strong> (<em>Sequence</em><em>[</em><em>Document</em><em>]</em>) – Documents to compress.</p></li>
+<li><p><strong>query</strong> (<em>str</em>) – Query to consider.</p></li>
+<li><p><strong>callbacks</strong> (<em>Callbacks</em><em>, </em><em>optional</em>) – Callbacks to run during the compression process, defaults to <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The <code class="xref py py-attr docutils literal notranslate"><span class="pre">top_n</span></code> highest-ranked documents</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sequence[Document]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-langchain_dartmouth.model_listing">
+<span id="model-listing"></span><h1>Model Listing<a class="headerlink" href="#module-langchain_dartmouth.model_listing" title="Link to this heading"></a></h1>
+<p>Model Listing and Information Classes.</p>
+<p>This module provides classes and utilities for discovering and querying available
+AI models through Dartmouth’s infrastructure. It includes functionality for listing
+models from both on-premises and cloud-based services, along with detailed metadata
+about each model’s capabilities, costs, and properties.</p>
+<p>The primary classes in this module are:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo" title="langchain_dartmouth.model_listing.ModelInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInfo</span></code></a>: A Pydantic model representing detailed information about a
+specific AI model, including its capabilities, hosting location, and cost.</p></li>
+<li><p><a class="reference internal" href="#langchain_dartmouth.model_listing.DartmouthModelListing" title="langchain_dartmouth.model_listing.DartmouthModelListing"><code class="xref py py-class docutils literal notranslate"><span class="pre">DartmouthModelListing</span></code></a>: Interface for listing on-premises models hosted
+by Dartmouth.</p></li>
+<li><p><a class="reference internal" href="#langchain_dartmouth.model_listing.CloudModelListing" title="langchain_dartmouth.model_listing.CloudModelListing"><code class="xref py py-class docutils literal notranslate"><span class="pre">CloudModelListing</span></code></a>: Interface for listing cloud-based models available
+through Dartmouth Chat.</p></li>
+</ul>
+<p>Model listing functions are integrated into the respective model class interfaces.
+For example, you can call <code class="xref py py-meth docutils literal notranslate"><span class="pre">ChatDartmouth.list()</span></code> or
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">DartmouthEmbeddings.list()</span></code> to discover available models for those specific
+use cases.</p>
+<p class="rubric">Examples</p>
+<p>Listing available cloud models:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_dartmouth.model_listing</span><span class="w"> </span><span class="kn">import</span> <span class="n">CloudModelListing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">listing</span> <span class="o">=</span> <span class="n">CloudModelListing</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">api_key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;DARTMOUTH_CHAT_API_KEY&quot;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;LCD_CLOUD_BASE_URL&quot;</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span> <span class="o">=</span> <span class="n">listing</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">base_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Accessing model information:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model ID: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Capabilities: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">capabilities</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cost: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">cost</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Local hosting: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">is_local</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The model listing functionality requires appropriate API credentials and access
+to Dartmouth’s AI infrastructure. Model availability and metadata may vary based
+on your access level and the current deployment configuration.</p>
+<dl class="py class pydantic_model">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.ModelInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.model_listing.</span></span><span class="sig-name descname"><span class="pre">ModelInfo</span></span><a class="headerlink" href="#langchain_dartmouth.model_listing.ModelInfo" title="Link to this definition"></a></dt>
+<dd><p>A class representing information about a model.</p>
+<p>This class encapsulates metadata about language models, embedding models,
+and other AI models available through Dartmouth’s infrastructure. It provides
+a structured way to access model properties, capabilities, and configuration
+details.</p>
+<p>The class automatically processes and validates model metadata from API responses,
+extracting relevant information from nested structures and tags.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.ModelInfo.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#langchain_dartmouth.model_listing.ModelInfo.id" title="Link to this definition"></a></dt>
+<dd><p>Unique identifier used to access the model in API calls.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.ModelInfo.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#langchain_dartmouth.model_listing.ModelInfo.name" title="Link to this definition"></a></dt>
+<dd><p>Human-readable name of the model for display purposes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.ModelInfo.description">
+<span class="sig-name descname"><span class="pre">description</span></span><a class="headerlink" href="#langchain_dartmouth.model_listing.ModelInfo.description" title="Link to this definition"></a></dt>
+<dd><p>Detailed description of the model’s purpose and characteristics,
+as displayed in Dartmouth Chat interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.ModelInfo.is_embedding">
+<span class="sig-name descname"><span class="pre">is_embedding</span></span><a class="headerlink" href="#langchain_dartmouth.model_listing.ModelInfo.is_embedding" title="Link to this definition"></a></dt>
+<dd><p>Flag indicating whether this model can be used for generating embeddings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.ModelInfo.capabilities">
+<span class="sig-name descname"><span class="pre">capabilities</span></span><a class="headerlink" href="#langchain_dartmouth.model_listing.ModelInfo.capabilities" title="Link to this definition"></a></dt>
+<dd><p>List of model capabilities such as ‘vision’, ‘tool calling’, ‘reasoning’, etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[str] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.ModelInfo.is_local">
+<span class="sig-name descname"><span class="pre">is_local</span></span><a class="headerlink" href="#langchain_dartmouth.model_listing.ModelInfo.is_local" title="Link to this definition"></a></dt>
+<dd><p>Indicates model hosting location:
+- True: Model is hosted on-premises by Dartmouth
+- False: Model is hosted off-premises by a third-party provider</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.ModelInfo.cost">
+<span class="sig-name descname"><span class="pre">cost</span></span><a class="headerlink" href="#langchain_dartmouth.model_listing.ModelInfo.cost" title="Link to this definition"></a></dt>
+<dd><p>Relative cost indicator for model usage:
+- “free”: No cost for usage
+- “$” to “$$$$”: Increasing cost levels
+- “undefined”: Cost information not available</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[“undefined”, “free”, “$”, “$$”, “$$$”, “$$$$”] | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">ModelInfo</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;gpt-4&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;GPT-4&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Advanced language model&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">is_embedding</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">capabilities</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;vision&quot;</span><span class="p">,</span> <span class="s2">&quot;tool calling&quot;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">is_local</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">cost</span><span class="o">=</span><span class="s2">&quot;$$$&quot;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+<span class="go">gpt-4</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">capabilities</span><span class="p">)</span>
+<span class="go">[&#39;vision&#39;, &#39;tool calling&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.DartmouthModelListing">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.model_listing.</span></span><span class="sig-name descname"><span class="pre">DartmouthModelListing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.model_listing.DartmouthModelListing" title="Link to this definition"></a></dt>
+<dd><p>Interface for listing on-premises models hosted by Dartmouth.</p>
+<p>This class provides access to models hosted on Dartmouth’s on-premises
+infrastructure. It handles authentication using Dartmouth API keys and
+supports filtering models by various criteria.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>api_key</strong> (<em>str</em>) – Dartmouth API key for authentication.</p></li>
+<li><p><strong>url</strong> (<em>str</em>) – Base URL of the Dartmouth model listing API.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_dartmouth.model_listing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DartmouthModelListing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">listing</span> <span class="o">=</span> <span class="n">DartmouthModelListing</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">api_key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;DARTMOUTH_API_KEY&quot;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">url</span><span class="o">=</span><span class="s2">&quot;https://api.dartmouth.edu/models/&quot;</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span> <span class="o">=</span> <span class="n">listing</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;llm&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">[</span><span class="s2">&quot;id&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Authentication is performed using JWT tokens obtained via the
+<code class="docutils literal notranslate"><span class="pre">dartmouth_auth</span></code> package. The token is automatically refreshed
+if a request fails due to authentication issues.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.DartmouthModelListing.list">
+<span class="sig-name descname"><span class="pre">list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.model_listing.DartmouthModelListing.list" title="Link to this definition"></a></dt>
+<dd><p>Get a list of available on-premises models.</p>
+<p>Retrieves models from Dartmouth’s on-premises infrastructure,
+with optional filtering by server, type, or capabilities.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>dict</em>) – <p>Optional filtering parameters:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>server<span class="classifier">str</span></dt><dd><p>Filter by specific server name</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>type<span class="classifier">str</span></dt><dd><p>Filter by model type (e.g., “llm”, “embedding”)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>capabilities<span class="classifier">str or list[str]</span></dt><dd><p>Filter by model capabilities</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of model descriptions as dictionaries. Each dictionary
+contains model metadata including id, name, capabilities, etc.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[dict]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>requests.HTTPError</strong> – If the API request fails after retry with re-authentication.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>List all models:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">models</span> <span class="o">=</span> <span class="n">listing</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Filter by model type:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">llm_models</span> <span class="o">=</span> <span class="n">listing</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;llm&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Filter by capabilities:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">vision_models</span> <span class="o">=</span> <span class="n">listing</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">capabilities</span><span class="o">=</span><span class="s2">&quot;vision&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>If the initial request fails, the method automatically attempts
+to re-authenticate and retry the request once.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.CloudModelListing">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.model_listing.</span></span><span class="sig-name descname"><span class="pre">CloudModelListing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">api_key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.model_listing.CloudModelListing" title="Link to this definition"></a></dt>
+<dd><p>Interface for listing cloud-based models available through Dartmouth Chat.</p>
+<p>This class provides access to models available through Dartmouth’s cloud
+infrastructure, including both base models and customized/fine-tuned variants.
+It returns structured <a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo" title="langchain_dartmouth.model_listing.ModelInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInfo</span></code></a> objects with detailed metadata.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>api_key</strong> (<em>str</em>) – API key for Dartmouth Chat authentication.</p></li>
+<li><p><strong>url</strong> (<em>str</em>) – Base URL of the cloud model listing API.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">langchain_dartmouth.model_listing</span><span class="w"> </span><span class="kn">import</span> <span class="n">CloudModelListing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">listing</span> <span class="o">=</span> <span class="n">CloudModelListing</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">api_key</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;DARTMOUTH_CHAT_API_KEY&quot;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">url</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;LCD_CLOUD_BASE_URL&quot;</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">models</span> <span class="o">=</span> <span class="n">listing</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">base_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> - Cost: </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">cost</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>Cloud models are accessed through bearer token authentication.
+The returned <a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo" title="langchain_dartmouth.model_listing.ModelInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInfo</span></code></a> objects provide structured access
+to model metadata including capabilities, costs, and hosting details.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="langchain_dartmouth.model_listing.CloudModelListing.list">
+<span class="sig-name descname"><span class="pre">list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#langchain_dartmouth.model_listing.CloudModelListing.list" title="Link to this definition"></a></dt>
+<dd><p>Get a list of available cloud models.</p>
+<p>Retrieves models from Dartmouth’s cloud infrastructure, with the
+option to filter for only base models or include customized variants.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>base_only</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, return only base models. If False (default), return
+both base models and customized/fine-tuned variants.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of <a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo" title="langchain_dartmouth.model_listing.ModelInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInfo</span></code></a> objects containing detailed metadata
+about each available model. Only active models are included.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[<a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo" title="langchain_dartmouth.model_listing.ModelInfo">ModelInfo</a>]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>requests.HTTPError</strong> – If the API request fails.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>List all available models:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">all_models</span> <span class="o">=</span> <span class="n">listing</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>List only base models:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">base_models</span> <span class="o">=</span> <span class="n">listing</span><span class="o">.</span><span class="n">list</span><span class="p">(</span><span class="n">base_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Access model details:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">base_models</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">if</span> <span class="s2">&quot;vision&quot;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">capabilities</span><span class="p">:</span>
+<span class="gp">... </span>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> supports vision&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="rubric">Notes</p>
+<p>The method automatically filters out inactive models from the results.
+Model metadata is validated and structured using the <a class="reference internal" href="#langchain_dartmouth.model_listing.ModelInfo" title="langchain_dartmouth.model_listing.ModelInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModelInfo</span></code></a>
+Pydantic model, which extracts capabilities, costs, and other properties
+from the API response.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-langchain_dartmouth.definitions">
+<span id="base-urls"></span><h1>Base URLs<a class="headerlink" href="#module-langchain_dartmouth.definitions" title="Link to this heading"></a></h1>
+<p>Configuration definitions for langchain_dartmouth.</p>
+<p>This module contains base URLs and configuration constants used throughout
+the <code class="docutils literal notranslate"><span class="pre">langchain_dartmouth</span></code> library. All URLs can be overridden via environment
+variables.</p>
+<dl class="py data">
+<dt class="sig sig-object py" id="langchain_dartmouth.definitions.EMBEDDINGS_BASE_URL">
+<span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.definitions.</span></span><span class="sig-name descname"><span class="pre">EMBEDDINGS_BASE_URL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://api.dartmouth.edu/api/ai/tei/'</span></em><a class="headerlink" href="#langchain_dartmouth.definitions.EMBEDDINGS_BASE_URL" title="Link to this definition"></a></dt>
+<dd><p>Base URL for the embeddings API endpoint.</p>
+<p>Can be overridden by setting the <code class="docutils literal notranslate"><span class="pre">LCD_EMBEDDINGS_BASE_URL</span></code> environment variable.
+Defaults to <code class="docutils literal notranslate"><span class="pre">https://api.dartmouth.edu/api/ai/tei/</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="langchain_dartmouth.definitions.RERANK_BASE_URL">
+<span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.definitions.</span></span><span class="sig-name descname"><span class="pre">RERANK_BASE_URL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://api.dartmouth.edu/api/ai/tei/'</span></em><a class="headerlink" href="#langchain_dartmouth.definitions.RERANK_BASE_URL" title="Link to this definition"></a></dt>
+<dd><p>Base URL for the reranking API endpoint.</p>
+<p>Can be overridden by setting the <code class="docutils literal notranslate"><span class="pre">LCD_RERANK_BASE_URL</span></code> environment variable.
+Defaults to <code class="docutils literal notranslate"><span class="pre">https://api.dartmouth.edu/api/ai/tei/</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="langchain_dartmouth.definitions.LLM_BASE_URL">
+<span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.definitions.</span></span><span class="sig-name descname"><span class="pre">LLM_BASE_URL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://api.dartmouth.edu/api/ai/tgi/'</span></em><a class="headerlink" href="#langchain_dartmouth.definitions.LLM_BASE_URL" title="Link to this definition"></a></dt>
+<dd><p>Base URL for the Large Language Model API endpoint.</p>
+<p>Can be overridden by setting the <code class="docutils literal notranslate"><span class="pre">LCD_LLM_BASE_URL</span></code> environment variable.
+Defaults to <code class="docutils literal notranslate"><span class="pre">https://api.dartmouth.edu/api/ai/tgi/</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="langchain_dartmouth.definitions.CLOUD_BASE_URL">
+<span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.definitions.</span></span><span class="sig-name descname"><span class="pre">CLOUD_BASE_URL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://chat.dartmouth.edu/api/'</span></em><a class="headerlink" href="#langchain_dartmouth.definitions.CLOUD_BASE_URL" title="Link to this definition"></a></dt>
+<dd><p>Base URL for the Dartmouth Chat API endpoint.</p>
+<p>Can be overridden by setting the <code class="docutils literal notranslate"><span class="pre">LCD_CLOUD_BASE_URL</span></code> environment variable.
+Defaults to <code class="docutils literal notranslate"><span class="pre">https://chat.dartmouth.edu/api/</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="langchain_dartmouth.definitions.MODEL_LISTING_BASE_URL">
+<span class="sig-prename descclassname"><span class="pre">langchain_dartmouth.definitions.</span></span><span class="sig-name descname"><span class="pre">MODEL_LISTING_BASE_URL</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://api.dartmouth.edu/api/ai/models/'</span></em><a class="headerlink" href="#langchain_dartmouth.definitions.MODEL_LISTING_BASE_URL" title="Link to this definition"></a></dt>
+<dd><p>Base URL for the model listings API endpoint.</p>
+<p>Can be overridden by setting the <code class="docutils literal notranslate"><span class="pre">LCD_MODEL_LISTINGS_BASE_URL</span></code> environment variable.
+Defaults to <code class="docutils literal notranslate"><span class="pre">https://api.dartmouth.edu/api/ai/models/</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="migration.html" class="btn btn-neutral float-left" title="Migration Guide to v0.3.x" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright by Simon Stone for Dartmouth College under Creative Commons CC BY-NC 4.0 License.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
