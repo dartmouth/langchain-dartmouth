@@ -68,7 +68,7 @@ Using a Dartmouth-hosted chat model:
 from langchain_dartmouth.llms import ChatDartmouth
 
 
-llm = ChatDartmouth(model_name="llama-3-8b-instruct")
+llm = ChatDartmouth(model_name="meta.llama-3-2-11b-vision-instruct")
 
 response = llm.invoke("Hi there!")
 
