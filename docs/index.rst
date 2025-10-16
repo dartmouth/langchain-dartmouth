@@ -36,9 +36,11 @@ Even though you can pass your key to each component using the ``dartmouth_api_ke
    We recommend using `python-dotenv <https://saurabh-kumar.com/python-dotenv/>`_ to manage your environment variables with an ``.env`` file.
 
 .. toctree::
-   api
    :maxdepth: 2
-   :caption: API Reference
+   :caption: Documentation
+
+   migration
+   api
 
 User Guide
 ======================

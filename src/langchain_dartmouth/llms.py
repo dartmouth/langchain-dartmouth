@@ -1,5 +1,3 @@
-from email.mime import base
-from huggingface_hub import inference
 from langchain_core.callbacks import (
     AsyncCallbackManagerForLLMRun,
     CallbackManagerForLLMRun,
@@ -17,12 +15,14 @@ from langchain_dartmouth.definitions import (
     MODEL_LISTING_BASE_URL,
 )
 from langchain_dartmouth.base import AuthenticatedMixin
-from langchain_dartmouth.utils import add_response_cost_to_usage_metadata
+from langchain_dartmouth.utils import (
+    add_response_cost_to_usage_metadata,
+)
 from langchain_dartmouth.exceptions import InvalidKeyError, ModelNotFoundError
 from langchain_dartmouth.model_listing import (
     DartmouthModelListing,
     CloudModelListing,
-    reformat_model_spec,
+    ModelInfo,
 )
 
 from openai import (
@@ -30,7 +30,6 @@ from openai import (
     DefaultAsyncHttpxClient,
     BadRequestError,
     APIStatusError,
-    NotFoundError,
 )
 
 import os
@@ -144,14 +143,14 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
         temperature: float = 0.8,
         max_new_tokens: int = 512,
         streaming: bool = False,
-        top_k: int = None,
-        top_p: float = None,
-        typical_p: float = None,
-        repetition_penalty: float = None,
+        top_k: Optional[int] = None,
+        top_p: Optional[float] = None,
+        typical_p: Optional[float] = None,
+        repetition_penalty: Optional[float] = None,
         return_full_text: bool = False,
-        truncate: int = None,
-        stop_sequences: List[str] = None,
-        seed: int = None,
+        truncate: Optional[int] = None,
+        stop_sequences: Optional[List[str]] = None,
+        seed: Optional[int] = None,
         do_sample: bool = False,
         watermark: bool = False,
         model_kwargs: Optional[dict] = None,
@@ -196,7 +195,7 @@ class DartmouthLLM(HuggingFaceTextGenInference, AuthenticatedMixin):
 
     @staticmethod
     def list(
-        dartmouth_api_key: str = None, url: str = MODEL_LISTING_BASE_URL
+        dartmouth_api_key: Optional[str] = None, url: str = MODEL_LISTING_BASE_URL
     ) -> list[dict]:
         """List the models available through ``DartmouthLLM``.
 
@@ -323,273 +322,17 @@ def DartmouthChatModel(*args, **kwargs):
     return DartmouthLLM(*args, **kwargs)
 
 
-class ChatDartmouth(ChatOpenAI, AuthenticatedMixin):
-    r"""Dartmouth-deployed Chat models (also known as Instruct models).
+class ChatDartmouth(ChatOpenAI):
+    """Chat models made available by Dartmouth.
 
-    Use this class if you want to use a model that uses a chat template
-    (e.g., `Llama 3.1 8B Instruct <https://huggingface.co/meta-llama/meta-llama-3.1-8b-instruct>`_).
+    Use this class if you want to use any chat model, e.g., Anthropic's Claude or OpenAI's GPT, made accessible by Dartmouth.
 
-    All prompts are automatically formatted to adhere to the chosen model's
-    chat template. If you need more control over the exact string sent to the model,
-    you may want to use :class:`DartmouthLLM` instead.
+    Both free on-prem models, as well as paid third-party models are available.
 
-    :param model_name: Name of the model to use, defaults to ``"llama-3-1-8b-instruct"``.
-    :type model_name: str
-    :param streaming: Whether to stream the results or not, defaults to ``False``.
-    :type streaming: bool
-    :param temperature: Temperature to use for sampling (higher temperature means more varied outputs), defaults to ``0.7``.
-    :type temperature: float
-    :param max_tokens: Maximum number of tokens to generate, defaults to 512
-    :type max_tokens: int
-    :param logprobs: Whether to return logprobs
-    :type logprobs: bool, optional
-    :param stream_usage: Whether to include usage metadata in streaming output. If ``True``, additional message chunks will be generated during the stream including usage metadata, defaults to ``False``.
-    :type stream_usage: bool
-    :param presence_penalty: Penalizes repeated tokens.
-    :type presence_penalty: float, optional
-    :param frequency_penalty: Penalizes repeated tokens according to frequency.
-    :type frequency_penalty: float, optional
-    :param seed: Seed for generation
-    :type seed: int, optional
-    :param top_logprobs: Number of most likely tokens to return at each token position, each with an associated log probability. ``logprobs`` must be set to true if this parameter is used.
-    :type top_logprobs: int, optional
-    :param logit_bias: Modify the likelihood of specified tokens appearing in the completion.
-    :type logit_bias: dict, optional
-    :param n: Number of chat completions to generate for each prompt, defaults to ``1``
-    :type n: int
-    :param top_p: Total probability mass of tokens to consider at each step.
-    :type top_p: float, optional
-    :param model_kwargs: Holds any model parameters valid for ``create`` call not explicitly specified.
-    :type model_kwargs: dict, optional
-    :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable DARTMOUTH_API_KEY.
-    :type dartmouth_api_key: str, optional
-    :param authenticator: A Callable returning a JSON Web Token (JWT) for authentication.
-    :type authenticator: Callable, optional
-    :param jwt_url: URL of the Dartmouth API endpoint returning a JSON Web Token (JWT).
-    :type jwt_url: str, optional
-    :param inference_server_url: URL pointing to an inference endpoint, defaults to ``"https://ai-api.dartmouth.edu/tgi/"``.
-    :type inference_server_url: str, optional
-    :param \**_: Additional keyword arguments are silently discarded. This is to ensure interface compatibility with other langchain components.
+    To see which models are available, which features they support, and how much they cost, run `ChatDartmouth.list()`.
 
 
-    Example
-    ----------
-
-    With an environment variable named ``DARTMOUTH_API_KEY`` pointing to your key obtained from `https://developer.dartmouth.edu <https://developer.dartmouth.edu>`_, using a Dartmouth-hosted LLM only takes a few lines of code:
-
-    .. code-block:: python
-
-        from langchain_dartmouth.llms import ChatDartmouth
-
-        llm = ChatDartmouth(model_name="llama-3-8b-instruct")
-
-        response = llm.invoke("Hi there!")
-
-        print(response.content)
-
-    .. note::
-
-        The required prompt format is enforced automatically when you are using ``ChatDartmouth``.
-    """
-
-    authenticator: Optional[Callable] = None
-    dartmouth_api_key: Optional[str] = None
-    jwt_url: Optional[str] = None
-    temperature: float = 0.7
-    max_tokens: int = 512
-    stream_usage: bool = False
-    presence_penalty: Optional[float] = None
-    frequency_penalty: Optional[float] = None
-    seed: Optional[int] = None
-    logprobs: Optional[bool] = None
-    top_logprobs: Optional[int] = None
-    logit_bias: Optional[Dict[int, int]] = None
-    streaming: bool = False
-    n: int = 1
-    top_p: Optional[float] = None
-    model_kwargs: Optional[dict] = None
-    model_name: str = Field(default="llama-3-1-8b-instruct")
-
-    def __init__(
-        self,
-        model_name: str = "llama-3-1-8b-instruct",
-        streaming: bool = False,
-        temperature: float = 0.7,
-        max_tokens: int = 512,
-        logprobs: Optional[bool] = None,
-        stream_usage: bool = False,
-        presence_penalty: Optional[float] = None,
-        frequency_penalty: Optional[float] = None,
-        seed: Optional[int] = None,
-        top_logprobs: Optional[int] = None,
-        logit_bias: Optional[Dict[int, int]] = None,
-        n: int = 1,
-        top_p: Optional[float] = None,
-        model_kwargs: Optional[dict] = None,
-        dartmouth_api_key: Optional[str] = None,
-        authenticator: Optional[Callable] = None,
-        jwt_url: Optional[str] = None,
-        inference_server_url: Optional[str] = None,
-        **_,
-    ):
-        # Explicitly pass kwargs to control which ones show up in the documentation
-        kwargs = {
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "stream_usage": stream_usage,
-            "presence_penalty": presence_penalty,
-            "frequency_penalty": frequency_penalty,
-            "seed": seed,
-            "logprobs": logprobs,
-            "top_logprobs": top_logprobs,
-            "logit_bias": logit_bias,
-            "streaming": streaming,
-            "n": n,
-            "top_p": top_p,
-            "model_kwargs": model_kwargs if model_kwargs is not None else {},
-        }
-        if inference_server_url:
-            kwargs["openai_api_base"] = inference_server_url
-        else:
-            kwargs["openai_api_base"] = f"{LLM_BASE_URL}{model_name}/v1/"
-        # For compliance, a non-null API key must be set
-        kwargs["openai_api_key"] = "unused"
-        kwargs["default_headers"] = {"User-Agent": USER_AGENT}
-        kwargs["model_name"] = model_name
-        super().__init__(**kwargs)
-        self.authenticator = authenticator
-        self.dartmouth_api_key = dartmouth_api_key
-        self.jwt_url = jwt_url
-        self.authenticate(jwt_url=self.jwt_url)
-        self.include_response_headers = True
-
-    @staticmethod
-    def list(
-        dartmouth_api_key: str = None, url: str = MODEL_LISTING_BASE_URL
-    ) -> list[dict]:
-        """List the models available through ``ChatDartmouth``.
-
-        :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
-        :type dartmouth_api_key: str, optional
-        :param url: URL of the listing server
-        :type url: str, optional
-        :return: A list of descriptions of the available models
-        :rtype: list[dict]
-        """
-        try:
-            if dartmouth_api_key is None:
-                dartmouth_api_key = os.environ["DARTMOUTH_API_KEY"]
-        except KeyError as e:
-            raise KeyError(
-                "Dartmouth API key not provided as argument or defined as environment variable 'DARTMOUTH_API_KEY'."
-            ) from e
-        listing = DartmouthModelListing(api_key=dartmouth_api_key, url=url)
-        models = listing.list(
-            server="text-generation-inference", type="llm", capabilities=["chat"]
-        )
-        return models
-
-    def invoke(self, *args, **kwargs) -> BaseMessage:
-        """Invokes the model to get a response to a query.
-
-        See `LangChain's API documentation <https://python.langchain.com/v0.1/docs/expression_language/interface/>`_ for details on how to use this method.
-
-        :return: The LLM's response to the prompt.
-        :rtype: BaseMessage
-        """
-        try:
-            return super().invoke(*args, **kwargs)
-        except NotFoundError:
-            raise ModelNotFoundError(
-                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
-                "to verify the model name."
-            )
-        except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            return super().invoke(*args, **kwargs)
-
-    async def ainvoke(self, *args, **kwargs) -> BaseMessage:
-        """Asynchronously invokes the model to get a response to a query.
-
-        See `LangChain's API documentation <https://python.langchain.com/v0.1/docs/expression_language/interface/>`_ for details on how to use this method.
-
-        :return: The LLM's response to the prompt.
-        :rtype: BaseMessage
-        """
-        try:
-            response = await super().ainvoke(*args, **kwargs)
-            return response
-        except NotFoundError:
-            raise ModelNotFoundError(
-                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
-                "to verify the model name."
-            )
-        except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            response = await super().ainvoke(*args, **kwargs)
-            return response
-
-    def stream(self, *args, **kwargs) -> Iterator[BaseMessageChunk]:
-        try:
-            for chunk in super().stream(*args, **kwargs):
-                yield chunk
-        except NotFoundError:
-            raise ModelNotFoundError(
-                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
-                "to verify the model name."
-            )
-        except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            for chunk in super().stream(*args, **kwargs):
-                yield chunk
-
-    async def astream(self, *args, **kwargs) -> AsyncIterator[BaseMessageChunk]:
-        try:
-            async for chunk in super().astream(*args, **kwargs):
-                yield chunk
-        except NotFoundError:
-            raise ModelNotFoundError(
-                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
-                "to verify the model name."
-            )
-        except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            async for chunk in super().astream(*args, **kwargs):
-                yield chunk
-
-    def generate(self, *args, **kwargs) -> LLMResult:
-        try:
-            return super().generate(*args, **kwargs)
-        except NotFoundError:
-            raise ModelNotFoundError(
-                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
-                "to verify the model name."
-            )
-        except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            return super().generate(*args, **kwargs)
-
-    async def agenerate(self, *args, **kwargs) -> LLMResult:
-        try:
-            response = await super().agenerate(*args, **kwargs)
-            return response
-        except NotFoundError:
-            raise ModelNotFoundError(
-                f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
-                "to verify the model name."
-            )
-        except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            response = await super().agenerate(*args, **kwargs)
-            return response
-
-
-class ChatDartmouthCloud(ChatOpenAI):
-    r"""Cloud chat models made available by Dartmouth.
-
-    Use this class if you want to use a model by a third-party provider, e.g., Anthropic or OpenAI, made accessible by Dartmouth.
-
-    :param model_name: Name of the model to use, defaults to ``"openai.gpt-4.1-mini-2025-04-14"``.
+    :param model_name: Name of the model to use, defaults to ``"openai.gpt-oss-120b"``.
     :type model_name: str
     :param streaming: Whether to stream the results or not, defaults to ``False``.
     :type streaming: bool
@@ -631,9 +374,9 @@ class ChatDartmouthCloud(ChatOpenAI):
 
     .. code-block:: python
 
-        from langchain_dartmouth.llms import ChatDartmouthCloud
+        from langchain_dartmouth.llms import ChatDartmouth
 
-        llm = ChatDartmouthCloud(model_name="openai.gpt-4.1-mini-2025-04-14")
+        llm = ChatDartmouth(model_name="openai.gpt-oss-120b")
 
         response = llm.invoke("Hi there!")
 
@@ -641,7 +384,8 @@ class ChatDartmouthCloud(ChatOpenAI):
 
     .. note::
 
-        The models available through ``ChatDartmouthCloud`` are pay-as-you-go third-party models. Dartmouth pays for the use, but a daily token limit per user applies.
+        Paid cloud models are billed by token consumption using different pricing depending on their complexity. Dartmouth pays for the use, but a daily token limit per user applies.
+        Your token budget is the same as in Dartmouth Chat. Learn more about credits in `Dartmouth Chat's documentation <https://rc.dartmouth.edu/ai/online-resources/setting-up-credit-groups/>`_.
     """
 
     dartmouth_chat_api_key: Optional[str] = None
@@ -658,7 +402,7 @@ class ChatDartmouthCloud(ChatOpenAI):
     n: int | None = None
     top_p: Optional[float] = None
     model_kwargs: Optional[dict] = None
-    model_name: str = Field(default="openai.gpt-4.1-mini-2025-04-14")
+    model_name: str = Field(default="openai.gpt-oss-120b")
 
     @model_validator(mode="before")
     @classmethod
@@ -682,7 +426,7 @@ class ChatDartmouthCloud(ChatOpenAI):
 
     def __init__(
         self,
-        model_name: str = "openai.gpt-4.1-mini-2025-04-14",
+        model_name: str = "openai.gpt-oss-120b",
         streaming: bool = False,
         temperature: float = 0.7,
         max_tokens: int = 512,
@@ -700,7 +444,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         inference_server_url: Optional[str] = None,
     ):
         # Explicitly pass kwargs to control which ones show up in the documentation
-        kwargs = {
+        kwargs: dict[str, Any] = {
             "temperature": temperature,
             "max_tokens": max_tokens,
             "stream_usage": stream_usage,
@@ -730,9 +474,7 @@ class ChatDartmouthCloud(ChatOpenAI):
                 ) from e
 
         kwargs["openai_api_key"] = dartmouth_chat_api_key
-        # if "_responses" in model_name:
-        #     # Use the Responses API spec if necessary
-        #     kwargs["use_responses_api"] = True
+
         super().__init__(
             **kwargs,
             # Turn off following redirects, see issue #8
@@ -748,8 +490,8 @@ class ChatDartmouthCloud(ChatOpenAI):
         dartmouth_chat_api_key: str | None = None,
         base_only: bool = True,
         url: str = CLOUD_BASE_URL,
-    ) -> list[dict]:
-        """List the models available through ``ChatDartmouthCloud``.
+    ) -> list[ModelInfo]:
+        """List the models available through ``ChatDartmouth``.
 
         :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
         :type dartmouth_chat_api_key: str, optional
@@ -758,7 +500,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         :param url: URL of the listing server
         :type url: str, optional
         :return: A list of descriptions of the available models
-        :rtype: list[dict]
+        :rtype: list[ModelInfo]
         """
         try:
             if dartmouth_chat_api_key is None:
@@ -769,20 +511,8 @@ class ChatDartmouthCloud(ChatOpenAI):
             ) from e
         listing = CloudModelListing(api_key=dartmouth_chat_api_key, url=url)
         models = listing.list(base_only=base_only)
-        # Some /models endpoints return the model list in a field:
-        if "data" in models:
-            models = models["data"]
 
-        # Filter out some models better accessed through other means
-        def is_cloud_model(m):
-            return not (
-                m["id"].startswith("meta")
-                or m["id"].startswith("ollama.")
-                or ("is_active" in m and m["is_active"] is False)
-            )
-
-        models = [reformat_model_spec(m) for m in models if is_cloud_model(m)]
-        return models
+        return [m for m in models if not m.is_embedding]
 
     def invoke(self, *args, **kwargs) -> BaseMessage:
         """Invokes the model to get a response to a query.
@@ -798,7 +528,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         except APIStatusError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             elif e.status_code == 401:  # Unauthorized
@@ -820,7 +550,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             else:
@@ -833,7 +563,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             else:
@@ -846,7 +576,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             else:
@@ -858,7 +588,7 @@ class ChatDartmouthCloud(ChatOpenAI):
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             else:
@@ -871,12 +601,21 @@ class ChatDartmouthCloud(ChatOpenAI):
         except BadRequestError as e:
             if "model not found" in str(e).lower():
                 raise ModelNotFoundError(
-                    f"Model {self.model_name} not found. Please use `ChatDartmouthCloud.list()` "
+                    f"Model {self.model_name} not found. Please use `ChatDartmouth.list()` "
                     "to verify the model name."
                 )
             else:
                 raise e
 
+
+def ChatDartmouthCloud(*args, **kwargs):
+    warnings.warn(
+        "ChatDartmouthCloud is deprecated and will be removed in a future update. Use `ChatDartmouth` as a drop-in replacement!"
+    )
+    return ChatDartmouth(*args, **kwargs)
+
+
+setattr(ChatDartmouthCloud, "list", ChatDartmouth.list)
 
 if __name__ == "__main__":
     print(DartmouthLLM.list())

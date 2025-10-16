@@ -1,34 +1,30 @@
 from langchain_dartmouth.definitions import USER_AGENT
-from langchain_huggingface.embeddings import HuggingFaceEndpointEmbeddings
-
+from langchain_openai import OpenAIEmbeddings
+from openai import DefaultHttpxClient, DefaultAsyncHttpxClient
 import os
-from typing import Callable, List, Optional
+from typing import Any, Callable, List, Optional
 
-from langchain_dartmouth.base import AuthenticatedMixin
-from langchain_dartmouth.definitions import EMBEDDINGS_BASE_URL, MODEL_LISTING_BASE_URL
-from langchain_dartmouth.model_listing import DartmouthModelListing
+from langchain_dartmouth.definitions import CLOUD_BASE_URL
+from langchain_dartmouth.model_listing import CloudModelListing, ModelInfo
 
 
-class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
+class DartmouthEmbeddings(OpenAIEmbeddings):
     """Embedding models deployed on Dartmouth's cluster.
 
-    :param model_name: The name of the embedding model to use, defaults to ``"bge-large-en-v1-5"``.
+    :param model_name: The name of the embedding model to use, defaults to ``"baai.bge-large-en-v1-5"``.
     :type model_name: str, optional
     :param model_kwargs: Keyword arguments to pass to the model.
     :type model_kwargs: dict, optional
-    :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
-    :type dartmouth_api_key: str, optional
-    :param authenticator: A Callable returning a JSON Web Token (JWT) for authentication. Only needed for special use cases.
-    :type authenticator: Callable, optional
-    :param jwt_url: URL of the Dartmouth API endpoint returning a JSON Web Token (JWT).
-    :type jwt_url: str, optional
-    :param embeddings_server_url: URL pointing to an embeddings endpoint, defaults to ``"https://ai-api.dartmouth.edu/tei/"``.
+    :param dimensions: The number of dimensions the resulting output embeddings should have. Not supported by all models.
+    :type dimensions: int, optional
+    :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
+    :param embeddings_server_url: URL pointing to an embeddings endpoint, defaults to ``"https://chat.dartmouth.edu/api/"``.
     :type embeddings_server_url: str, optional
 
     Example
     -----------
 
-    With an environment variable named ``DARTMOUTH_API_KEY`` pointing to your key obtained from `https://developer.dartmouth.edu <https://developer.dartmouth.edu>`_, using a Dartmouth-hosted embedding model only takes a few lines of code:
+    With an environment variable named ``DARTMOUTH_CHAT_API_KEY`` pointing to your key obtained from `Dartmouth Chat <https://chat.dartmouth.edu>`_, using anembedding model only takes a few lines of code:
 
     .. code-block:: python
 
@@ -42,57 +38,75 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
         print(response)
     """
 
-    authenticator: Optional[Callable] = None
-    dartmouth_api_key: Optional[str] = None
-    jwt_url: Optional[str] = None
+    dartmouth_chat_api_key: Optional[str] = None
     embeddings_server_url: Optional[str] = None
 
     def __init__(
         self,
-        model_name: str = "bge-large-en-v1-5",
+        model_name: str = "baai.bge-large-en-v1-5",
         model_kwargs: Optional[dict] = None,
-        dartmouth_api_key: Optional[str] = None,
-        authenticator: Optional[Callable] = None,
-        jwt_url: Optional[str] = None,
-        embeddings_server_url: Optional[str] = None,
+        dimensions: Optional[int] = None,
+        dartmouth_chat_api_key: Optional[str] = None,
+        embeddings_server_base_url: Optional[str] = None,
     ):
-        """Initializes the object"""
-        if embeddings_server_url:
-            endpoint = f"{embeddings_server_url}{model_name}/"
+        kwargs: dict[str, Any] = dict()
+        kwargs["default_headers"] = {"User-Agent": USER_AGENT}
+        kwargs["model"] = model_name
+        kwargs["model_kwargs"] = model_kwargs if model_kwargs else {}
+        kwargs["dimensions"] = dimensions
+        # Deactivate tokenization and context length checking
+        kwargs["check_embedding_ctx_length"] = False
+        if embeddings_server_base_url is not None:
+            kwargs["openai_api_base"] = embeddings_server_base_url
         else:
-            endpoint = f"{EMBEDDINGS_BASE_URL}{model_name}/"
-        super().__init__(model=endpoint, model_kwargs=model_kwargs)
-        self.client.headers.update({"User-Agent": USER_AGENT})
-        self.async_client.headers.update({"User-Agent": USER_AGENT})
-        self.authenticator = authenticator
-        self.dartmouth_api_key = dartmouth_api_key
-        self.authenticate(jwt_url=jwt_url)
+            kwargs["openai_api_base"] = f"{CLOUD_BASE_URL}"
+        if dartmouth_chat_api_key is None:
+            try:
+                dartmouth_chat_api_key = os.environ["DARTMOUTH_CHAT_API_KEY"]
+            except KeyError as e:
+                raise KeyError(
+                    "Dartmouth Chat API key not provided as argument or defined as environment variable 'DARTMOUTH_CHAT_API_KEY'."
+                ) from e
+
+        kwargs["openai_api_key"] = dartmouth_chat_api_key
+
+        super().__init__(
+            **kwargs,
+            # Turn off following redirects, see issue #8
+            http_async_client=DefaultAsyncHttpxClient(follow_redirects=False),
+            http_client=DefaultHttpxClient(follow_redirects=False),
+        )
+
+        self.dartmouth_chat_api_key = dartmouth_chat_api_key
 
     @staticmethod
     def list(
-        dartmouth_api_key: str = None, url: str = MODEL_LISTING_BASE_URL
-    ) -> list[dict]:
+        dartmouth_chat_api_key: str | None = None,
+        url: str = CLOUD_BASE_URL,
+    ) -> list[ModelInfo]:
         """List the models available through ``DartmouthEmbeddings``.
 
-        :param dartmouth_api_key: A Dartmouth API key (obtainable from https://developer.dartmouth.edu). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_API_KEY``.
-        :type dartmouth_api_key: str, optional
+        :param dartmouth_chat_api_key: A Dartmouth Chat API key (obtainable from `https://chat.dartmouth.edu <https://chat.dartmouth.edu>`_). If not specified, it is attempted to be inferred from an environment variable ``DARTMOUTH_CHAT_API_KEY``.
+        :type dartmouth_chat_api_key: str, optional
         :param url: URL of the listing server
         :type url: str, optional
         :return: A list of descriptions of the available models
-        :rtype: list[dict]
+        :rtype: list[ModelInfo]
         """
         try:
-            if dartmouth_api_key is None:
-                dartmouth_api_key = os.environ["DARTMOUTH_API_KEY"]
+            if dartmouth_chat_api_key is None:
+                dartmouth_chat_api_key = os.environ["DARTMOUTH_CHAT_API_KEY"]
         except KeyError as e:
             raise KeyError(
-                "Dartmouth API key not provided as argument or defined as environment variable 'DARTMOUTH_API_KEY'."
+                "Dartmouth Chat API key not provided as argument or defined as environment variable 'DARTMOUTH_CHAT_API_KEY'."
             ) from e
-        listing = DartmouthModelListing(api_key=dartmouth_api_key, url=url)
-        models = listing.list(server="text-embeddings-inference", type="embedding")
-        return models
+        listing = CloudModelListing(api_key=dartmouth_chat_api_key, url=url)
+        # Embedding models can't be workspace models, so hardcode to base-only
+        models = listing.list(base_only=True)
 
-    def embed_query(self, text: str) -> List[float]:
+        return [m for m in models if m.is_embedding]
+
+    def embed_query(self, text: str, **kwargs: Any) -> List[float]:
         """Call out to the embedding endpoint to retrieve the embedding of the query text.
 
         :param text: The text to embed.
@@ -100,13 +114,11 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
         :return: Embeddings for the text.
         :rtype: List[float]
         """
-        try:
-            return super().embed_query(text)
-        except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            return super().embed_query(text)
+        return super().embed_query(text, **kwargs)
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def embed_documents(
+        self, texts: List[str], chunk_size: Optional[int] = None, **kwargs: Any
+    ) -> List[List[float]]:
         """Call out to the embedding endpoint to retrieve the embeddings of multiple texts.
 
         :param text: The list of texts to embed.
@@ -114,13 +126,9 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
         :return: Embeddings for the texts.
         :rtype: List[List[float]]
         """
-        try:
-            return super().embed_documents(texts)
-        except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            return super().embed_documents(texts)
+        return super().embed_documents(texts, chunk_size, **kwargs)
 
-    async def aembed_query(self, text: str) -> List[float]:
+    async def aembed_query(self, text: str, **kwargs: Any) -> List[float]:
         """Async Call to the embedding endpoint to retrieve the embedding of the query text.
 
         :param text: The text to embed.
@@ -128,15 +136,12 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
         :return: Embeddings for the text.
         :rtype: List[float]
         """
-        try:
-            response = await super().aembed_query(text)
-            return response
-        except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            response = await super().aembed_query(text)
-            return response
+        response = await super().aembed_query(text, **kwargs)
+        return response
 
-    async def aembed_documents(self, texts: List[str]) -> List[List[float]]:
+    async def aembed_documents(
+        self, texts: List[str], chunk_size: Optional[int] = None, **kwargs: Any
+    ) -> List[List[float]]:
         """Async Call to the embedding endpoint to retrieve the embeddings of multiple texts.
 
         :param text: The list of texts to embed.
@@ -144,14 +149,9 @@ class DartmouthEmbeddings(HuggingFaceEndpointEmbeddings, AuthenticatedMixin):
         :return: Embeddings for the texts.
         :rtype: List[List[float]]
         """
-        try:
-            response = await super().aembed_documents(texts)
-            return response
-        except Exception:
-            self.authenticate(jwt_url=self.jwt_url)
-            response = await super().aembed_documents(texts)
-            return response
+        response = await super().aembed_documents(texts, chunk_size, **kwargs)
+        return response
 
 
 if __name__ == "__main__":
-    print(DartmouthEmbeddings.list())
+    print([m["name"] for m in DartmouthEmbeddings.list()])

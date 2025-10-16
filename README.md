@@ -68,7 +68,7 @@ Using a Dartmouth-hosted chat model:
 from langchain_dartmouth.llms import ChatDartmouth
 
 
-llm = ChatDartmouth(model_name="llama-3-8b-instruct")
+llm = ChatDartmouth(model_name="meta.llama-3-2-11b-vision-instruct")
 
 response = llm.invoke("Hi there!")
 
@@ -80,10 +80,10 @@ print(response.content)
 Using a Dartmouth-provided third-party chat model:
 
 ```python
-from langchain_dartmouth.llms import ChatDartmouthCloud
+from langchain_dartmouth.llms import ChatDartmouth
 
 
-llm = ChatDartmouthCloud(model_name="openai.gpt-4.1-mini-2025-04-14")
+llm = ChatDartmouth(model_name="openai.gpt-4.1-mini-2025-04-14")
 
 response = llm.invoke("Hi there!")
 ```

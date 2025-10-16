@@ -5,40 +5,41 @@ name: Run tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 permissions:
   contents: read
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python 3.11
-      uses: actions/setup-python@v3
-      with:
-        python-version: "3.11"
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8 pytest ./
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Lint with flake8
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        pytest
-      env:
-        DARTMOUTH_API_KEY: ${{ secrets.DARTMOUTH_API_KEY }}
-        DARTMOUTH_CHAT_API_KEY: ${{ secrets.DARTMOUTH_CHAT_API_KEY }}
-        LITELLM_TEAM_API_KEY: ${{ secrets.LITELLM_TEAM_API_KEY }}
-        LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: "latest"
+      - name: Set up Python 3.11
+        run: uv python install 3.11
+      - name: Install dependencies
+        run: |
+          uv sync --extra dev
+          uv pip install flake8
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          uv run flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics --exclude=.venv
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          uv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=.venv
+      - name: Test with pytest
+        run: |
+          uv run pytest
+        env:
+          DARTMOUTH_API_KEY: ${{ secrets.DARTMOUTH_API_KEY }}
+          DARTMOUTH_CHAT_API_KEY: ${{ secrets.DARTMOUTH_CHAT_API_KEY }}
+          LITELLM_TEAM_API_KEY: ${{ secrets.LITELLM_TEAM_API_KEY }}
+          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
+          STATIC_TEST_MODEL_ID: ${{ vars.STATIC_TEST_MODEL_ID }}
