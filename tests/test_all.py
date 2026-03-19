@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from typing import Literal
 
 import openai
@@ -211,6 +212,34 @@ def test_dartmouth_embeddings(model_name):
         embeddings = DartmouthEmbeddings(model_name=model_name)
     result = embeddings.embed_query("Is there anybody out there?")
     assert result
+
+
+def test_chat_dartmouth_multimodal():
+    import base64
+
+    from langchain_core.messages import HumanMessage
+
+    audio_bytes = (Path(__file__).parent / "test.mp4").read_bytes()
+    encoded_data = base64.b64encode(audio_bytes).decode("utf-8")
+
+    message = HumanMessage(
+        content=[
+            {"type": "text", "text": "Please summarize the video."},
+            {
+                "type": "file",
+                "file": {
+                    "file_id": f"data:video/mp4;base64,{encoded_data}",
+                    "format": "video/mp4",
+                },
+            },
+        ],
+    )
+
+    llm = ChatDartmouth(model_name="vertex_ai.gemini-2.5-pro", max_tokens=2048)
+
+    response = llm.invoke([message])
+
+    response.pretty_print()
 
 
 def test_dartmouth_embeddings_dimensions():
