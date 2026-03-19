@@ -235,7 +235,7 @@ def test_chat_dartmouth_multimodal():
         ],
     )
 
-    llm = ChatDartmouth(model_name="google_genai.gemini-2.5-pro", max_tokens=2048)
+    llm = ChatDartmouth(model_name="vertex_ai.gemini-2.5-pro", max_tokens=2048)
 
     response = llm.invoke([message])
 
