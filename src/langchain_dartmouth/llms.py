@@ -364,6 +364,8 @@ class ChatDartmouth(ChatOpenAI):
     :type dartmouth_chat_api_key: str, optional
     :param inference_server_url: The URL of the inference server (e.g., https://chat.dartmouth.edu/api/)
     :type inference_server_url: str, optional
+    :param use_responses_api: Whether to use the Responses API (required for some OpenAI models)
+    :type use_responses_api: bool, optional
     :param \**_: Additional keyword arguments are silently discarded. This is to ensure interface compatibility with other langchain components.
 
 
@@ -403,6 +405,7 @@ class ChatDartmouth(ChatOpenAI):
     top_p: Optional[float] = None
     model_kwargs: Optional[dict] = None
     model_name: str = Field(default="openai.gpt-oss-120b")
+    use_responses_api: Optional[bool] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -416,12 +419,18 @@ class ChatDartmouth(ChatOpenAI):
             or model.startswith("openai_responses.o")
             or ".o4" in model
         ):
-            if "temperature" in values:
+            if "temperature" in values and values["temperature"] != 1:
                 warnings.warn(
                     f"{model} does not support setting the temperature. Forcing"
                     f"`temperature` to 1 (instead of {values['temperature']})."
                 )
             values["temperature"] = 1
+
+            if not values.get("use_responses_api", False):
+                warnings.warn(
+                    "OpenAI Responses API model detected! Setting `use_responses_api = True`"
+                )
+                values["use_responses_api"] = True
         return values
 
     def __init__(
@@ -442,7 +451,31 @@ class ChatDartmouth(ChatOpenAI):
         model_kwargs: Optional[dict] = None,
         dartmouth_chat_api_key: Optional[str] = None,
         inference_server_url: Optional[str] = None,
+        use_responses_api: Optional[bool] = None,
     ):
+
+        # Coerce temperature value
+        if (
+            model_name.startswith("openai.o")
+            or model_name.startswith("openai.gpt-5")
+            or model_name.startswith("openai_responses.gpt-5")
+            or model_name.startswith("openai_responses.o")
+            or ".o4" in model_name
+        ):
+            if temperature != 1:
+                warnings.warn(
+                    f"{model_name} does not support setting the temperature. Forcing"
+                    f"`temperature` to 1 (instead of {temperature})."
+                )
+            temperature = 1
+
+        # Use Responses API for models that require it
+        if model_name.startswith("openai.gpt-5") and not use_responses_api:
+            warnings.warn(
+                "Responses API model detected! Setting `use_responses_api` to `True`."
+            )
+            use_responses_api = True
+
         # Explicitly pass kwargs to control which ones show up in the documentation
         kwargs: dict[str, Any] = {
             "temperature": temperature,
@@ -458,13 +491,18 @@ class ChatDartmouth(ChatOpenAI):
             "n": n,
             "top_p": top_p,
             "model_kwargs": model_kwargs if model_kwargs is not None else {},
+            "use_responses_api": use_responses_api,
         }
         kwargs["default_headers"] = {"User-Agent": USER_AGENT}
         kwargs["model_name"] = model_name
         if inference_server_url is not None:
             kwargs["openai_api_base"] = inference_server_url
         else:
-            kwargs["openai_api_base"] = f"{CLOUD_BASE_URL}"
+            _url = f"{CLOUD_BASE_URL}"
+            if use_responses_api and _url.rstrip("/").endswith("api"):
+                # The /responses endpoint is found under /openai/responses, not /api/responses
+                _url = _url.replace("api", "openai")
+            kwargs["openai_api_base"] = _url
         if dartmouth_chat_api_key is None:
             try:
                 dartmouth_chat_api_key = os.environ["DARTMOUTH_CHAT_API_KEY"]
