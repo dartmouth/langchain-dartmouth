@@ -72,10 +72,20 @@ def test_chat_dartmouth(model_name):
             # too many tokens for reasoning to produce output
             llm = ChatDartmouth(model_name=model_name, max_tokens=1024)
             kwargs = {"reasoning_effort": "low"}
+        elif "gpt-5" in model_name.lower():
+            llm = ChatDartmouth(
+                model_name=model_name,
+                temperature=None,
+                max_tokens=1024,
+                use_responses_api=True,
+            )
         else:
             llm = ChatDartmouth(model_name=model_name)
-
-    response = llm.invoke("Ping", **kwargs)
+    try:
+        response = llm.invoke("Ping", **kwargs)
+    except openai.BadRequestError as e:
+        if e.type == "budget_exceeded":
+            pytest.skip()
     assert len(response.content) > 0
 
 
