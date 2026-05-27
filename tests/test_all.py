@@ -18,8 +18,8 @@ from langchain_dartmouth.retrievers.document_compressors import (
     DartmouthReranker,
 )
 
-from langchain.docstore.document import Document
-from langchain.schema import HumanMessage
+from langchain_core.documents import Document
+from langchain.messages import HumanMessage
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -79,6 +79,12 @@ def test_chat_dartmouth(model_name):
                 max_tokens=1024,
                 use_responses_api=True,
             )
+        elif "opus-4-7" in model_name.lower():
+            llm = ChatDartmouth(
+                model_name=model_name,
+                temperature=None,
+                max_tokens=1024,
+            )
         else:
             llm = ChatDartmouth(model_name=model_name)
     try:
@@ -86,6 +92,8 @@ def test_chat_dartmouth(model_name):
     except openai.BadRequestError as e:
         if e.type == "budget_exceeded":
             pytest.skip()
+        else:
+            raise e
     assert len(response.content) > 0
 
 
@@ -151,16 +159,23 @@ def test_chat_dartmouth_tool_use(model_name):
         """Get your current status"""
         return TEST_STATUS
 
+    if "opus-4-7" in model_name:
+        temperature = None
+    else:
+        temperature = 0.7
+
     if model_name == "default":
         llm = ChatDartmouth(
             max_tokens=1024,
             streaming=True,
+            temperature=temperature,
         )
     else:
         llm = ChatDartmouth(
             model_name=model_name,
             max_tokens=1024,
             streaming=True,
+            temperature=temperature,
         )
     llm_with_tools = llm.bind_tools(tools=[status])
 
