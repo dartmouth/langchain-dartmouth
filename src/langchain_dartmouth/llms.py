@@ -437,7 +437,7 @@ class ChatDartmouth(ChatOpenAI):
         self,
         model_name: str = "openai.gpt-oss-120b",
         streaming: bool = False,
-        temperature: float = 0.7,
+        temperature: float | None = 0.7,
         max_tokens: int = 512,
         logprobs: Optional[bool] = None,
         stream_usage: bool = False,
