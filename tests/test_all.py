@@ -18,12 +18,21 @@ from langchain_dartmouth.retrievers.document_compressors import (
     DartmouthReranker,
 )
 
-from langchain.docstore.document import Document
-from langchain.schema import HumanMessage
+from langchain_core.documents import Document
+from langchain.messages import HumanMessage
 
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
+
+
+def _get_temperature(model_name: str) -> float | None:
+    if any(
+        name in model_name.lower()
+        for name in ["opus-4-7", "opus-4-8", "fable-5", "sonnet-5", "gpt-5"]
+    ):
+        return None
+    return 0.7
 
 
 def test_dartmouth_llm():
@@ -67,15 +76,34 @@ def test_chat_dartmouth(model_name):
     if model_name == "default":
         llm = ChatDartmouth()
     else:
+
+        temperature = _get_temperature(model_name)
+
         if "gemini-2.5" in model_name.lower():
             # Gemini reasoning models with default settings often need
             # too many tokens for reasoning to produce output
             llm = ChatDartmouth(model_name=model_name, max_tokens=1024)
             kwargs = {"reasoning_effort": "low"}
+        elif "gpt-5" in model_name.lower():
+            llm = ChatDartmouth(
+                model_name=model_name,
+                temperature=temperature,
+                max_tokens=1024,
+                use_responses_api=True,
+            )
         else:
-            llm = ChatDartmouth(model_name=model_name)
-
-    response = llm.invoke("Ping", **kwargs)
+            llm = ChatDartmouth(
+                model_name=model_name,
+                temperature=temperature,
+                max_tokens=1024,
+            )
+    try:
+        response = llm.invoke("Ping", **kwargs)
+    except openai.BadRequestError as e:
+        if e.type == "budget_exceeded":
+            pytest.skip()
+        else:
+            raise e
     assert len(response.content) > 0
 
 
@@ -141,24 +169,28 @@ def test_chat_dartmouth_tool_use(model_name):
         """Get your current status"""
         return TEST_STATUS
 
+    temperature = _get_temperature(model_name)
+
     if model_name == "default":
         llm = ChatDartmouth(
             max_tokens=1024,
             streaming=True,
+            temperature=temperature,
         )
     else:
         llm = ChatDartmouth(
             model_name=model_name,
             max_tokens=1024,
             streaming=True,
+            temperature=temperature,
         )
     llm_with_tools = llm.bind_tools(tools=[status])
 
     response = llm_with_tools.invoke("What is your status")
 
-    assert response.tool_calls  # type: ignore
+    assert response.tool_calls
 
-    result = status.invoke(response.tool_calls[0]["args"])  # type: ignore
+    result = status.invoke(response.tool_calls[0]["args"])
 
     assert result == TEST_STATUS
 
