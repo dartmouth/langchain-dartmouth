@@ -26,6 +26,15 @@ from dotenv import load_dotenv, find_dotenv
 load_dotenv(find_dotenv())
 
 
+def _get_temperature(model_name: str) -> float | None:
+    if any(
+        name in model_name.lower()
+        for name in ["opus-4-7", "opus-4-8", "fable-5", "sonnet-5", "gpt-5"]
+    ):
+        return None
+    return 0.7
+
+
 def test_dartmouth_llm():
     llm = DartmouthLLM()
     response = llm.invoke("Write a Python script to swap the values of two variables")
@@ -67,6 +76,9 @@ def test_chat_dartmouth(model_name):
     if model_name == "default":
         llm = ChatDartmouth()
     else:
+
+        temperature = _get_temperature(model_name)
+
         if "gemini-2.5" in model_name.lower():
             # Gemini reasoning models with default settings often need
             # too many tokens for reasoning to produce output
@@ -75,18 +87,16 @@ def test_chat_dartmouth(model_name):
         elif "gpt-5" in model_name.lower():
             llm = ChatDartmouth(
                 model_name=model_name,
-                temperature=None,
+                temperature=temperature,
                 max_tokens=1024,
                 use_responses_api=True,
             )
-        elif "opus-4-7" in model_name.lower():
+        else:
             llm = ChatDartmouth(
                 model_name=model_name,
-                temperature=None,
+                temperature=temperature,
                 max_tokens=1024,
             )
-        else:
-            llm = ChatDartmouth(model_name=model_name)
     try:
         response = llm.invoke("Ping", **kwargs)
     except openai.BadRequestError as e:
@@ -159,10 +169,7 @@ def test_chat_dartmouth_tool_use(model_name):
         """Get your current status"""
         return TEST_STATUS
 
-    if "opus-4-7" in model_name:
-        temperature = None
-    else:
-        temperature = 0.7
+    temperature = _get_temperature(model_name)
 
     if model_name == "default":
         llm = ChatDartmouth(
@@ -181,9 +188,9 @@ def test_chat_dartmouth_tool_use(model_name):
 
     response = llm_with_tools.invoke("What is your status")
 
-    assert response.tool_calls  # type: ignore
+    assert response.tool_calls
 
-    result = status.invoke(response.tool_calls[0]["args"])  # type: ignore
+    result = status.invoke(response.tool_calls[0]["args"])
 
     assert result == TEST_STATUS
 
