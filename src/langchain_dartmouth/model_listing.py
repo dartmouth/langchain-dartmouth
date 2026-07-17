@@ -50,7 +50,7 @@ on your access level and the current deployment configuration.
 
 from langchain_dartmouth.definitions import USER_AGENT
 
-from pydantic import BaseModel, ValidationInfo, model_validator, field_validator
+from pydantic import BaseModel, ValidationInfo, model_validator, field_validator, Field
 import requests
 from dartmouth_auth import get_jwt
 
@@ -115,7 +115,7 @@ class ModelInfo(BaseModel):
     is_embedding: bool | None = None
     capabilities: list[str] | None = None
     is_local: bool | None = None
-    cost: Literal["undefined", "free", "$", "$$", "$$$", "$$$$"] | None = None
+    cost: str | None = Field(default=None, pattern=r"^(undefined|free|\$+)$")
 
     _relevant_capabilities: ClassVar[list[str]] = [
         "vision",  # Model can process images
