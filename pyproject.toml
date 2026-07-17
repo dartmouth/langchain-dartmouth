@@ -32,8 +32,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Dartmouth-Libraries/langchain-dartmouth"
-Issues = "https://github.com/Dartmouth-Libraries/langchain-dartmouth/issues"
+Homepage = "https://github.com/dartmouth/langchain-dartmouth"
+Issues = "https://github.com/dartmouth/langchain-dartmouth/issues"
 
 [build-system]
 requires = ["hatchling"]
