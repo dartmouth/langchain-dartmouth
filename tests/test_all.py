@@ -27,10 +27,7 @@ load_dotenv(find_dotenv())
 
 
 def _get_temperature(model_name: str) -> float | None:
-    if any(
-        name in model_name.lower()
-        for name in ["opus-4-7", "opus-4-8", "fable-5", "sonnet-5", "gpt-5"]
-    ):
+    if any(name in model_name.lower() for name in ["opus", "fable", "sonnet", "gpt"]):
         return None
     return 0.7
 
