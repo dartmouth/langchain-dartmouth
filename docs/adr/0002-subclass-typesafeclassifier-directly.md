@@ -1,0 +1,3 @@
+# Subclass TypeSafeClassifier directly instead of wrapping it
+
+Other Dartmouth components wrap upstream LangChain integrations either by direct subclassing (`ChatDartmouth` subclasses `ChatOpenAI`) or by composition (`DartmouthReranker` wraps a Dartmouth-authored `TeiCrossEncoderReranker`, injecting a pre-built client). `DartmouthDecisions` subclasses `TypeSafeClassifier` directly, because `base_url` and `api_key` are plain pydantic fields on the upstream class rather than being baked into an injected `httpx2.Client`. Composition would have added an indirection layer with no benefit, since the upstream class already exposes exactly the configuration surface Dartmouth needs to override.

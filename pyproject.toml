@@ -22,6 +22,7 @@ dependencies = [
     "text_generation",
     "python-dotenv",
     "langchain-huggingface>=0.3.0",
+    "langchain-typesafe==0.0.1a3",
 ]
 license = {file = "LICENSE"}
 

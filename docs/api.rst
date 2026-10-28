@@ -12,6 +12,13 @@ Large Language Models
     :members:
 
 
+Decision Models
+===============================================
+
+.. automodule:: langchain_dartmouth.decisions
+    :members:
+
+
 Reranking
 ===============================================
 
