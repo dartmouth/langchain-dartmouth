@@ -36,10 +36,4 @@ jobs:
           uv run flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics --exclude=.venv
       - name: Test with pytest
         run: |
-          uv run pytest
-        env:
-          DARTMOUTH_API_KEY: ${{ secrets.DARTMOUTH_API_KEY }}
-          DARTMOUTH_CHAT_API_KEY: ${{ secrets.DARTMOUTH_CHAT_API_KEY }}
-          LITELLM_TEAM_API_KEY: ${{ secrets.LITELLM_TEAM_API_KEY }}
-          LITELLM_BASE_URL: ${{ secrets.LITELLM_BASE_URL }}
-          STATIC_TEST_MODEL_ID: ${{ vars.STATIC_TEST_MODEL_ID }}
+          uv run pytest tests/unit
