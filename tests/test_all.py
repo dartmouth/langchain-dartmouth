@@ -336,17 +336,9 @@ def test_tei_client():
 
 # ---------------------------------------------------------------------------
 # DartmouthDecisions
-#
-# These tests target a Decision model endpoint that is not yet publicly
-# deployed. The non-network tests below (construction, field mapping, and
-# exception wrapping) run unconditionally. The live tests are skipped unless
-# LCD_DECISIONS_BASE_URL (and a matching DARTMOUTH_CHAT_API_KEY) point at a
-# running build, e.g. a local instance at http://127.0.0.1:8080/api/.
 # ---------------------------------------------------------------------------
 
 _DECISIONS_LIVE_AVAILABLE = os.environ.get("LCD_DECISIONS_BASE_URL") is not None
-
-
 
 
 @pytest.mark.skipif(
