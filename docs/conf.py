@@ -1,7 +1,7 @@
 import os
 import sys
 
-sys.path.insert(0, os.path.abspath("../src/langchain_dartmouth/"))
+sys.path.insert(0, os.path.abspath("../src"))
 
 from langchain_dartmouth import __version__
 

@@ -52,6 +52,111 @@ __all__ = [
     "Usage",
 ]
 
+Choice.__doc__ = """Select one label from a fixed set of alternatives.
+
+Use :class:`Choice` for categorical decisions with no inherent ordering, such as routing a
+support request, detecting a document type, or selecting an intent. The answer
+includes the selected label, a probability for every supplied label, and confidence
+derived from the shape of that probability distribution.
+
+.. admonition:: Example: Route a support request
+
+    .. code-block:: python
+
+        from langchain_dartmouth.decisions import Choice, DartmouthDecisions
+
+        classifier = DartmouthDecisions()
+        response = classifier.invoke(
+            {
+                "state": "Stripe fails whenever I connect my account.",
+                "questions": {
+                    "department": Choice(
+                        instructions="Which team should handle this request?",
+                        criteria={
+                            "billing": "Payment, invoice, or subscription issues.",
+                            "technical": "Product bugs or integration failures.",
+                            "sales": "Pricing or purchasing questions.",
+                        },
+                    )
+                },
+            }
+        )
+        department = response.choices["department"]
+
+        if department.confidence >= 0.7:
+            route_to(department.choice)
+        else:
+            route_to_human_triage()
+"""
+
+Score.__doc__ = """Evaluate state against an ordered rubric.
+
+Use :class:`Score` when the answer lies on a spectrum whose levels can be described, such
+as severity, urgency, or customer frustration. Criteria are numbered from zero in
+their supplied order. The returned score is an expected value and may fall between
+integer levels; the full probability distribution remains available for custom
+decision logic.
+
+.. admonition:: Example: Score customer frustration
+
+    .. code-block:: python
+
+        from langchain_dartmouth.decisions import Score, DartmouthDecisions
+
+        classifier = DartmouthDecisions()
+        response = classifier.invoke(
+            {
+                "state": "This has failed three times. Fix it now.",
+                "questions": {
+                    "frustration": Score(
+                        instructions="How frustrated does the customer appear?",
+                        criteria=[
+                            "Calm and neutral.",
+                            "Concerned but civil.",
+                            "Very angry or using strong language.",
+                        ],
+                    )
+                },
+            }
+        )
+        frustration = response.scores["frustration"]
+
+        print(frustration.score)  # May be fractional, for example 1.35.
+        print(frustration.legend)  # The original zero-based rubric.
+        print(frustration.probabilities)  # Probability for each rubric level.
+"""
+
+Noul.__doc__ = """Ask a binary question and receive the probability that its answer is yes.
+
+Use :class:`Noul` when the probability itself is useful to application code, such as
+deciding whether a message reports a bug or requests a refund. A value near ``1``
+indicates strong support for yes, a value near ``0`` indicates strong support for no,
+and a value near ``0.5`` indicates uncertainty. Noul answers do not include a separate
+confidence value.
+
+.. admonition:: Example: Detect an urgent support request
+
+    .. code-block:: python
+
+        from langchain_dartmouth.decisions import Noul, DartmouthDecisions
+
+        classifier = DartmouthDecisions()
+        response = classifier.invoke(
+            {
+                "state": "Production is down. Please help immediately.",
+                "questions": {
+                    "urgent": Noul(
+                        instructions="Does this message require an urgent response?"
+                    )
+                },
+            }
+        )
+        urgency = response.nouls["urgent"].noul
+
+        if urgency >= 0.8:
+            page_on_call_engineer()
+"""
+
 
 class DartmouthDecisions(TypeSafeClassifier):
     """Decision models made available by Dartmouth.
