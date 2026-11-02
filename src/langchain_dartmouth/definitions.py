@@ -52,4 +52,11 @@ Can be overridden by setting the ``LCD_MODEL_LISTINGS_BASE_URL`` environment var
 Defaults to ``https://api.dartmouth.edu/api/ai/models/``.
 """
 
+DECISIONS_BASE_URL = os.environ.get("LCD_DECISIONS_BASE_URL", CLOUD_BASE_URL)
+"""str: Base URL for the Decision model API endpoint.
+
+Can be overridden by setting the ``LCD_DECISIONS_BASE_URL`` environment variable.
+Defaults to the same value as :data:`CLOUD_BASE_URL`.
+"""
+
 USER_AGENT = f"langchain_dartmouth/Python {__version__}"

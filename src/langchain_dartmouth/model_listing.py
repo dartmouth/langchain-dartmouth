@@ -512,6 +512,13 @@ class CloudModelListing(BaseModelListing):
     to model metadata including capabilities, costs, and hosting details.
     """
 
+    _LIST_PATH: ClassVar[str] = "v1/models"
+    """Path appended to :attr:`url` when listing models.
+
+    Overridden by subclasses that list models through a different endpoint
+    on the same host (e.g., :class:`DecisionModelListing`).
+    """
+
     def _authenticate(self):
         """Set up bearer token authentication for cloud API.
 
@@ -566,7 +573,7 @@ class CloudModelListing(BaseModelListing):
         Pydantic model, which extracts capabilities, costs, and other properties
         from the API response.
         """
-        resp = self.SESSION.get(url=self.url + f"v1/models")
+        resp = self.SESSION.get(url=self.url + self._LIST_PATH)
         resp.raise_for_status()
         cloud_models = resp.json()
         if "data" in cloud_models:
@@ -584,6 +591,36 @@ class CloudModelListing(BaseModelListing):
             for m in cloud_models
             if m.get("is_active", True)
         ]
+
+
+class DecisionModelListing(CloudModelListing):
+    """Interface for listing Decision models available through Dartmouth Chat.
+
+    Decision models are listed through a different endpoint than the regular
+    chat and embedding models exposed by :class:`CloudModelListing`, but
+    share the same host, authentication, and response shape.
+
+    Parameters
+    ----------
+    api_key : str
+        API key for Dartmouth Chat authentication.
+    url : str
+        Base URL of the cloud model listing API.
+
+    Examples
+    --------
+    >>> from langchain_dartmouth.model_listing import DecisionModelListing
+    >>> import os
+    >>> listing = DecisionModelListing(
+    ...     api_key=os.environ["DARTMOUTH_CHAT_API_KEY"],
+    ...     url=os.environ["LCD_DECISIONS_BASE_URL"]
+    ... )
+    >>> models = listing.list()
+    >>> for model in models:
+    ...     print(model.id)
+    """
+
+    _LIST_PATH: ClassVar[str] = "v1/systemone/models"
 
 
 if __name__ == "__main__":

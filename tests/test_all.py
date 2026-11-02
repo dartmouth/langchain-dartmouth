@@ -11,7 +11,13 @@ from langchain_dartmouth.llms import (
     DartmouthChatModel,
 )
 from langchain_dartmouth.embeddings import DartmouthEmbeddings
-from langchain_dartmouth.exceptions import InvalidKeyError, ModelNotFoundError
+from langchain_dartmouth.decisions import DartmouthDecisions, Noul
+from langchain_dartmouth.exceptions import (
+    DecisionAPIError,
+    DecisionRateLimitError,
+    InvalidKeyError,
+    ModelNotFoundError,
+)
 from langchain_dartmouth.cross_encoders import TextEmbeddingInferenceClient
 from langchain_dartmouth.retrievers.document_compressors import (
     TeiCrossEncoderReranker,
@@ -326,6 +332,65 @@ def test_tei_client():
     scores = tei_client.rerank(query=query, texts=texts)
 
     assert scores
+
+
+# ---------------------------------------------------------------------------
+# DartmouthDecisions
+#
+# These tests target a Decision model endpoint that is not yet publicly
+# deployed. The non-network tests below (construction, field mapping, and
+# exception wrapping) run unconditionally. The live tests are skipped unless
+# LCD_DECISIONS_BASE_URL (and a matching DARTMOUTH_CHAT_API_KEY) point at a
+# running build, e.g. a local instance at http://127.0.0.1:8080/api/.
+# ---------------------------------------------------------------------------
+
+_DECISIONS_LIVE_AVAILABLE = os.environ.get("LCD_DECISIONS_BASE_URL") is not None
+
+
+
+
+@pytest.mark.skipif(
+    not _DECISIONS_LIVE_AVAILABLE,
+    reason="No LCD_DECISIONS_BASE_URL available; Decision model endpoint is not yet publicly deployed.",
+)
+def test_dartmouth_decisions_list():
+    models = DartmouthDecisions.list()
+    assert len(models) > 0
+
+
+@pytest.mark.skipif(
+    not _DECISIONS_LIVE_AVAILABLE,
+    reason="No LCD_DECISIONS_BASE_URL available; Decision model endpoint is not yet publicly deployed.",
+)
+def test_dartmouth_decisions():
+    decisions = DartmouthDecisions()
+    response = decisions.invoke(
+        {
+            "state": "Production is down. Please help immediately.",
+            "questions": {
+                "urgent": Noul(
+                    instructions="Does this message require an urgent response?"
+                )
+            },
+        }
+    )
+    assert "urgent" in response.nouls
+    assert 0.0 <= response.nouls["urgent"].noul <= 1.0
+
+
+@pytest.mark.skipif(
+    not _DECISIONS_LIVE_AVAILABLE,
+    reason="No LCD_DECISIONS_BASE_URL available; Decision model endpoint is not yet publicly deployed.",
+)
+def test_dartmouth_decisions_bad_key():
+    decisions = DartmouthDecisions(dartmouth_chat_api_key="Bad")
+    with pytest.raises(InvalidKeyError):
+        decisions.invoke(
+            {
+                "state": "Hello",
+                "questions": {"urgent": Noul(instructions="Is this urgent?")},
+            }
+        )
 
 
 if __name__ == "__main__":
