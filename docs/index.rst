@@ -25,6 +25,13 @@ You can install the latest release of the library from PyPI using pip:
 
 Alternatively, you can clone the `library repository <https://github.com/dartmouth/langchain-dartmouth>`_ from GitHub.
 
+.. note::
+   An Agent Skill for this library is available in the `dartmouth-skills <https://github.com/dartmouth/dartmouth-skills>`_ repository. It guides coding agents when writing or debugging code that uses ``langchain_dartmouth``. Install it with:
+
+   .. code-block::
+
+      npx skills add dartmouth/dartmouth-skills@langchain-dartmouth
+
 Getting Started
 ==================
 Using Dartmouth's compute infrastructure or the third-party models paid for by Dartmouth requires authentication. The components in this library handle authentication "under-the-hood", but require valid Dartmouth API keys.
